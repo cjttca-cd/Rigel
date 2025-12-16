@@ -11,13 +11,6 @@ interface SearchPanelProps {
 
 const STATUS_OPTIONS: TransactionStatus[] = ['initialized', 'journaled', 'updated'];
 
-// 筛选条件配置
-interface FilterConfig {
-    id: string;
-    label: string;
-    enabled: boolean;
-}
-
 export function SearchPanel({ onSearch, loading = false }: SearchPanelProps) {
     const [expanded, setExpanded] = useState(false);
 
