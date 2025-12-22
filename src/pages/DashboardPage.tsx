@@ -1,6 +1,7 @@
 import { ChevronDown, Plus, RefreshCw, Sparkles, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Layout } from '../components/layout/Layout';
+import { LedgerResult, TrialBalanceResult } from '../components/report';
 import { ExportButton } from '../components/transaction/ExportButton';
 import { SearchPanel } from '../components/transaction/SearchPanel';
 import { TransactionForm } from '../components/transaction/TransactionForm';
@@ -14,16 +15,20 @@ import { useToast } from '../contexts/ToastContext';
 import {
     createTransaction,
     deleteTransactions,
+    generateSummary,
     getDefaultQueryParams,
     processAIJournal,
     queryTransactions,
     updateTransaction
 } from '../services/api';
 import type {
+    LedgerResponse,
     QueryParams,
+    SummaryRequest,
     Transaction,
     TransactionInput,
-    TransactionUpdate
+    TransactionUpdate,
+    TrialBalanceResponse
 } from '../types';
 
 const CACHE_KEY_PREFIX = 'journal_transactions_';
@@ -61,6 +66,14 @@ export function DashboardPage() {
     const [hasMore, setHasMore] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const PAGE_SIZE = 20;
+
+    // 账表生成状态
+    const [reportLoading, setReportLoading] = useState(false);
+    const [showLedgerResult, setShowLedgerResult] = useState(false);
+    const [showTrialBalanceResult, setShowTrialBalanceResult] = useState(false);
+    const [ledgerData, setLedgerData] = useState<LedgerResponse | null>(null);
+    const [trialBalanceData, setTrialBalanceData] = useState<TrialBalanceResponse | null>(null);
+    const [reportDateRange, setReportDateRange] = useState({ from: '', to: '' });
 
     // Load transactions
     const loadTransactions = useCallback(async (params?: QueryParams, useCache = true) => {
@@ -256,6 +269,59 @@ export function DashboardPage() {
         loadTransactions(undefined, false);
     };
 
+    // 账表生成处理
+    const handleGenerateReport = async (params: SummaryRequest) => {
+        setReportLoading(true);
+        setReportDateRange({ from: params.date_from, to: params.date_to });
+
+        try {
+            const response = await generateSummary(params);
+
+            if (response.status === 'successed' && response.detail) {
+                if (params.summary_type === 1) {
+                    // 総勘定元帳
+                    setLedgerData(response.detail as LedgerResponse);
+                    setShowLedgerResult(true);
+                } else {
+                    // 試算表
+                    setTrialBalanceData(response.detail as TrialBalanceResponse);
+                    setShowTrialBalanceResult(true);
+                }
+            } else {
+                // 处理错误
+                const message = response.message || '生成失败';
+
+                if (message.includes('initialized records')) {
+                    // 存在未记账数据
+                    showToast('warning', '存在未执行 AI仕訳 的账目，已显示在列表中。请选择账目执行 AI仕訳 后，再次尝试生成账表。');
+                    // 将未处理的数据载入到 Dashboard
+                    const initializedRecords = response.detail as unknown as Transaction[];
+                    if (Array.isArray(initializedRecords) && initializedRecords.length > 0) {
+                        setTransactions(initializedRecords);
+                        setIsSearchActive(false);
+                    }
+                } else if (message.includes('Authentication')) {
+                    showToast('error', '登录已过期，请重新登录');
+                } else if (message.includes('No available records')) {
+                    showToast('info', '该期间内没有可生成账表的账目');
+                } else if (message.includes('Input data')) {
+                    showToast('error', '输入参数有误，请检查日期格式');
+                } else if (message.includes('Database')) {
+                    showToast('error', '服务器错误，请稍后重试');
+                } else if (message.includes('Switch')) {
+                    showToast('error', '系统错误，请联系管理员');
+                } else {
+                    showToast('error', message);
+                }
+            }
+        } catch (error) {
+            console.error('Generate report error:', error);
+            showToast('error', '生成账表失败');
+        } finally {
+            setReportLoading(false);
+        }
+    };
+
     // 加载更多
     const handleLoadMore = async () => {
         if (loadingMore || !hasMore) return;
@@ -350,7 +416,12 @@ export function DashboardPage() {
                 </div>
 
                 {/* 搜索面板 */}
-                <SearchPanel onSearch={handleSearch} loading={loading} />
+                <SearchPanel
+                    onSearch={handleSearch}
+                    onGenerateReport={handleGenerateReport}
+                    loading={loading}
+                    reportLoading={reportLoading}
+                />
 
                 {/* 操作工具栏 */}
                 <div className="bg-white rounded-xl border border-gray-200 p-4">
@@ -533,6 +604,28 @@ export function DashboardPage() {
                 variant="primary"
                 loading={actionLoading}
             />
+
+            {/* 総勘定元帳结果 */}
+            {ledgerData && (
+                <LedgerResult
+                    isOpen={showLedgerResult}
+                    onClose={() => setShowLedgerResult(false)}
+                    data={ledgerData}
+                    dateFrom={reportDateRange.from}
+                    dateTo={reportDateRange.to}
+                />
+            )}
+
+            {/* 試算表结果 */}
+            {trialBalanceData && (
+                <TrialBalanceResult
+                    isOpen={showTrialBalanceResult}
+                    onClose={() => setShowTrialBalanceResult(false)}
+                    data={trialBalanceData}
+                    dateFrom={reportDateRange.from}
+                    dateTo={reportDateRange.to}
+                />
+            )}
         </Layout>
     );
 }

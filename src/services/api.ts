@@ -2,11 +2,14 @@ import { config } from '../config';
 import type {
     APIResponse,
     DeleteResult,
+    LedgerResponse,
     OCRResult,
     QueryParams,
+    SummaryRequest,
     Transaction,
     TransactionInput,
-    TransactionUpdate
+    TransactionUpdate,
+    TrialBalanceResponse
 } from '../types';
 import { getIdToken } from './firebase';
 
@@ -19,7 +22,8 @@ const WEBHOOKS = {
     DATA_UPDATE: '/webhook/42950520-dff5-4bc6-8505-15a3078fb3ff',
     AI_JOURNAL: '/webhook/42fd082c-bafd-47ac-b450-2f39b689e0d0',
     DATA_QUERY: '/webhook/53aa1136-cd3b-4a55-9d0c-c00de74a888c',
-    AI_OCR: '/webhook/4a8142b4-db3c-4ade-83e7-b03309ef0c59'
+    AI_OCR: '/webhook/4a8142b4-db3c-4ade-83e7-b03309ef0c59',
+    DATA_SUMMARY: '/webhook/7a29fc9c-bf4b-4140-8cec-de44bbd0c49e'
 };
 
 // Generic API call helper
@@ -160,5 +164,16 @@ export async function ocrReceipt(
 ): Promise<APIResponse<OCRResult>> {
     return apiCall<OCRResult>(WEBHOOKS.AI_OCR, {
         image: imageBase64
+    });
+}
+
+// Generate summary report (総勘定元帳 or 試算表)
+export async function generateSummary(
+    params: SummaryRequest
+): Promise<APIResponse<LedgerResponse | TrialBalanceResponse>> {
+    return apiCall<LedgerResponse | TrialBalanceResponse>(WEBHOOKS.DATA_SUMMARY, {
+        date_from: params.date_from,
+        date_to: params.date_to,
+        summary_type: params.summary_type
     });
 }

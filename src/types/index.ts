@@ -178,6 +178,61 @@ export interface OCRResult {
     tax_amount: number;         // 税额
 }
 
+// 账表生成请求参数
+export interface SummaryRequest {
+    date_from: string;  // YYYY-MM-DD
+    date_to: string;    // YYYY-MM-DD
+    summary_type: 1 | 2; // 1=総勘定元帳, 2=試算表
+}
+
+// 総勘定元帳 类型
+export interface LedgerEntry {
+    年月日: string;
+    相手勘定科目: string;
+    摘要: string;
+    借方金額: number | null;
+    貸方金額: number | null;
+    残高: number;
+    備考?: string;
+}
+
+export interface Ledger {
+    勘定科目: string;
+    entries: LedgerEntry[];
+    summary: {
+        借方合計: number;
+        貸方合計: number;
+        残高: number;
+    };
+}
+
+export interface LedgerResponse {
+    success: boolean;
+    total_accounts: number;
+    ledgers: Ledger[];
+}
+
+// 試算表 类型
+export interface TrialBalanceEntry {
+    勘定科目: string;
+    借方合計: number;
+    貸方合計: number;
+    借方残高: number;
+    貸方残高: number;
+}
+
+export interface TrialBalanceResponse {
+    success: boolean;
+    total_accounts: number;
+    entries: TrialBalanceEntry[];
+    summary: {
+        借方合計: number;
+        貸方合計: number;
+        借方残高: number;
+        貸方残高: number;
+    };
+}
+
 // Toast notification types
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 

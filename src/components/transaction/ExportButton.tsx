@@ -20,8 +20,7 @@ export function ExportButton({ transactions, selectedIds, disabled = false }: Ex
 
         // Define CSV headers - 使用日文表示
         const headers = [
-            'ID',
-            '日時',
+            '日付',
             '種類',           // transaction_type
             '決済方法',       // fin_type
             '備考',
@@ -38,7 +37,6 @@ export function ExportButton({ transactions, selectedIds, disabled = false }: Ex
 
         // Convert transactions to CSV rows - 使用日文标签
         const rows = dataToExport.map(t => [
-            t.id,
             t.transaction_date?.split('T')[0] || '',
             t.transaction_type ? TRANSACTION_TYPE_LABELS_JP[t.transaction_type] : '',
             t.fin_type ? FIN_TYPE_LABELS_JP[t.fin_type as 1 | 2 | 3 | 4 | 5] : '',
@@ -66,7 +64,7 @@ export function ExportButton({ transactions, selectedIds, disabled = false }: Ex
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `账目导出_${new Date().toISOString().split('T')[0]}.csv`;
+        link.download = `仕訳帳_${new Date().toISOString().split('T')[0]}.csv`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
