@@ -493,7 +493,7 @@ export function HomePage() {
                                     <div className="w-10 h-10 bg-violet-500 rounded-lg flex items-center justify-center">
                                         <TrendingUp className="w-5 h-5 text-white" />
                                     </div>
-                                    <span className="font-medium text-gray-900">月度收入支出统计表</span>
+                                    <span className="font-medium text-gray-900">月度收支统计</span>
                                     <ArrowRight className="w-4 h-4 text-gray-400 ml-auto group-hover:text-violet-500 transition-colors" />
                                 </Link>
                             </div>
