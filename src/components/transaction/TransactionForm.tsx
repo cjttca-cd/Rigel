@@ -374,7 +374,7 @@ export function TransactionForm({
                 {/* 1. 概述（最上面，2行高度） */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        概述（超10万的支出请注明，可指定仕訳項目）
+                        概述（可指定仕訳項目）
                     </label>
                     <textarea
                         value={formData.description}
