@@ -7,6 +7,7 @@ import { LedgerResult } from '../components/report/LedgerResult';
 import { MonthlyChartPanel } from '../components/report/MonthlyChartPanel';
 import { TrialBalanceResult } from '../components/report/TrialBalanceResult';
 import { Button } from '../components/ui/Button';
+import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
 import { generateSummary } from '../services/api';
 import type { JournalResponse, LedgerResponse, SummaryRequest, Transaction, TrialBalanceResponse } from '../types';
@@ -16,9 +17,9 @@ type ReportType = 'trial_balance' | 'ledger' | 'journal' | 'monthly_chart';
 // 报表类型配置 - 每个报表都有独特的颜色和图标
 const REPORT_CONFIGS = {
     trial_balance: {
-        label: '試算表',
+        labelKey: '試算表',
         subtitle: 'Trial Balance',
-        description: '汇总所有仕訳科目的借贷合计和余额，用于核对账目平衡',
+        descriptionKey: '汇总所有仕訳科目的借贷合计和余额，用于核对账目平衡',
         icon: Scale,
         gradient: 'from-blue-400 via-blue-500 to-indigo-500',
         bgLight: 'bg-blue-50',
@@ -27,9 +28,9 @@ const REPORT_CONFIGS = {
         shadowColor: 'shadow-blue-500/20'
     },
     ledger: {
-        label: '総勘定元帳',
+        labelKey: '総勘定元帳',
         subtitle: 'General Ledger',
-        description: '按仕訳科目分类记录所有账目明细，便于查看每个科目的收支历史',
+        descriptionKey: '按仕訳科目分类记录所有账目明细，便于查看每个科目的收支历史',
         icon: BookOpen,
         gradient: 'from-teal-400 via-teal-500 to-emerald-500',
         bgLight: 'bg-teal-50',
@@ -38,9 +39,9 @@ const REPORT_CONFIGS = {
         shadowColor: 'shadow-teal-500/20'
     },
     journal: {
-        label: '仕訳帳',
+        labelKey: '仕訳帳',
         subtitle: 'Journal',
-        description: '完整的账本记录，按时间顺序记录所有账目',
+        descriptionKey: '完整的账本记录，按时间顺序记录所有账目',
         icon: FileSpreadsheet,
         gradient: 'from-violet-400 via-violet-500 to-purple-500',
         bgLight: 'bg-violet-50',
@@ -49,9 +50,9 @@ const REPORT_CONFIGS = {
         shadowColor: 'shadow-violet-500/20'
     },
     monthly_chart: {
-        label: '月度收支统计',
+        labelKey: '月度收支统计',
         subtitle: 'Monthly Chart',
-        description: '可视化图表展示月度总收入和支出情况',
+        descriptionKey: '可视化图表展示月度总收入和支出情况',
         icon: TrendingUp,
         gradient: 'from-amber-400 via-orange-400 to-orange-500',
         bgLight: 'bg-amber-50',
@@ -65,6 +66,7 @@ const REPORT_TYPES: ReportType[] = ['monthly_chart', 'trial_balance', 'ledger', 
 
 export function ReportsPage() {
     const location = useLocation();
+    const { t } = useI18n();
     const locationState = location.state as {
         reportType?: ReportType;
         autoGenerate?: boolean;
@@ -134,7 +136,7 @@ export function ReportsPage() {
     // 生成报表
     const handleGenerateReport = async () => {
         if (!dateFrom || !dateTo) {
-            showToast('error', '请选择日期范围');
+            showToast('error', t('请选择日期范围'));
             return;
         }
 
@@ -164,16 +166,16 @@ export function ReportsPage() {
             if (result.status === 'successed' && result.detail) {
                 if (reportType === 'trial_balance') {
                     setTrialBalanceData(result.detail as TrialBalanceResponse);
-                    showToast('success', '試算表 生成成功');
+                    showToast('success', t('试算表 生成成功'));
                 } else if (reportType === 'ledger') {
                     setLedgerData(result.detail as LedgerResponse);
-                    showToast('success', '総勘定元帳 生成成功');
+                    showToast('success', t('総勘定元帳 生成成功'));
                 } else if (reportType === 'journal') {
                     setJournalData(result.detail as JournalResponse);
-                    showToast('success', '仕訳帳 生成成功');
+                    showToast('success', t('仕訳帳 生成成功'));
                 } else if (reportType === 'monthly_chart') {
                     setMonthlyChartData(result.detail as JournalResponse);
-                    showToast('success', '月度收支统计 生成成功');
+                    showToast('success', t('月度收支统计 生成成功'));
                     // 自动滚动到图表结果
                     setTimeout(() => {
                         resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -182,7 +184,7 @@ export function ReportsPage() {
             } else {
                 if (result.message?.includes('initialized records') && Array.isArray(result.detail)) {
                     const uninitializedTransactions = result.detail as Transaction[];
-                    showToast('warning', `日期范围内有 ${uninitializedTransactions.length} 条账目未进行 AI 仕訳，正在跳转...`);
+                    showToast('warning', t('日期范围内有 {count} 条账目未进行 AI 仕訳，正在跳转...', { count: uninitializedTransactions.length }));
                     setTimeout(() => {
                         navigate('/transactions', {
                             state: {
@@ -193,12 +195,12 @@ export function ReportsPage() {
                         });
                     }, 1000);
                 } else {
-                    throw new Error(result.message || '生成失败');
+                    throw new Error(result.message || t('生成失败'));
                 }
             }
         } catch (error) {
             console.error('Report generation error:', error);
-            showToast('error', '报表生成失败');
+            showToast('error', t('报表生成失败'));
         } finally {
             setLoading(false);
         }
@@ -266,14 +268,14 @@ export function ReportsPage() {
                     <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
                         <BarChart3 className="w-5 h-5 text-indigo-600" />
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900">报表中心</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">{t('报表中心')}</h1>
                 </div>
 
                 {/* ===== 桌面端：横向卡片选择 ===== */}
                 <div className="hidden lg:block">
                     {/* 报表类型选择 - 横向排列 */}
                     <div className="mb-6">
-                        <h2 className="text-sm font-medium text-gray-700 mb-4">选择报表类型</h2>
+                        <h2 className="text-sm font-medium text-gray-700 mb-4">{t('选择报表类型')}</h2>
                         <div className="grid grid-cols-4 gap-4">
                             {REPORT_TYPES.map((type) => {
                                 const config = REPORT_CONFIGS[type];
@@ -308,7 +310,7 @@ export function ReportsPage() {
 
                                             {/* 标题 */}
                                             <h3 className="text-lg font-bold text-white mb-1">
-                                                {config.label}
+                                                {t(config.labelKey)}
                                             </h3>
                                             <p className="text-xs text-white/70 mb-3">
                                                 {config.subtitle}
@@ -316,7 +318,7 @@ export function ReportsPage() {
 
                                             {/* 描述 */}
                                             <p className="text-sm text-white/80 line-clamp-2">
-                                                {config.description}
+                                                {t(config.descriptionKey)}
                                             </p>
 
                                             {/* 选中指示器 */}
@@ -338,7 +340,7 @@ export function ReportsPage() {
 
                     {/* 设置与输出区域 */}
                     <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                        <h2 className="text-sm font-medium text-gray-700 mb-4">设置与输出</h2>
+                        <h2 className="text-sm font-medium text-gray-700 mb-4">{t('设置与输出')}</h2>
                         <div className="flex items-end gap-6">
                             {/* 日期范围 */}
                             <div className="flex-1">
@@ -351,28 +353,28 @@ export function ReportsPage() {
                                                 onClick={() => setQuickDateRange(3)}
                                                 className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
                                             >
-                                                近3个月
+                                                {t('近3个月')}
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => setQuickDateRange(6)}
                                                 className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
                                             >
-                                                近6个月
+                                                {t('近6个月')}
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => setQuickDateRange(12)}
                                                 className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
                                             >
-                                                近12个月
+                                                {t('近12个月')}
                                             </button>
                                         </div>
                                     )}
 
                                     <div className="flex items-center gap-3">
                                         <div>
-                                            <label className="block text-xs text-gray-500 mb-1">开始日期</label>
+                                            <label className="block text-xs text-gray-500 mb-1">{t('开始日期')}</label>
                                             <input
                                                 type="date"
                                                 value={dateFrom}
@@ -384,7 +386,7 @@ export function ReportsPage() {
                                         </div>
                                         <span className="text-gray-400 mt-5">~</span>
                                         <div>
-                                            <label className="block text-xs text-gray-500 mb-1">结束日期</label>
+                                            <label className="block text-xs text-gray-500 mb-1">{t('结束日期')}</label>
                                             <input
                                                 type="date"
                                                 value={dateTo}
@@ -406,7 +408,7 @@ export function ReportsPage() {
                                 loading={loading}
                                 icon={<FileText className="w-5 h-5" />}
                             >
-                                生成报表
+                                {t('生成报表')}
                             </Button>
                         </div>
                     </div>
@@ -417,7 +419,7 @@ export function ReportsPage() {
                     {/* 报表类型选择 - 折叠手风琴 */}
                     <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
                         <h2 className="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 border-b border-gray-100">
-                            选择报表类型
+                            {t('选择报表类型')}
                         </h2>
                         <div className="divide-y divide-gray-100">
                             {REPORT_TYPES.map((type) => {
@@ -445,7 +447,7 @@ export function ReportsPage() {
                                                 </div>
                                                 <div>
                                                     <span className={`font-medium ${isSelected ? config.textColor : 'text-gray-900'}`}>
-                                                        {config.label}
+                                                        {t(config.labelKey)}
                                                     </span>
                                                     <p className="text-xs text-gray-500">{config.subtitle}</p>
                                                 </div>
@@ -453,7 +455,7 @@ export function ReportsPage() {
                                             <div className="flex items-center gap-2">
                                                 {isSelected && (
                                                     <span className="px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
-                                                        已选择
+                                                        {t('已选择')}
                                                     </span>
                                                 )}
                                                 <ChevronDown
@@ -469,7 +471,7 @@ export function ReportsPage() {
                                         `}>
                                             <div className={`px-4 pb-4 pt-2 ${config.bgLight} border-l-4 ${config.borderColor}`}>
                                                 <p className="text-sm text-gray-600">
-                                                    {config.description}
+                                                    {t(config.descriptionKey)}
                                                 </p>
                                             </div>
                                         </div>
@@ -481,7 +483,7 @@ export function ReportsPage() {
 
                     {/* 日期范围 */}
                     <div className="bg-white rounded-2xl border border-gray-200 p-4">
-                        <h2 className="text-sm font-medium text-gray-700 mb-4">日期范围</h2>
+                        <h2 className="text-sm font-medium text-gray-700 mb-4">{t('日期范围')}</h2>
 
                         {/* 快速选择按钮 */}
                         {reportType === 'monthly_chart' && (
@@ -491,28 +493,28 @@ export function ReportsPage() {
                                     onClick={() => setQuickDateRange(3)}
                                     className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
                                 >
-                                    近3个月
+                                    {t('近3个月')}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setQuickDateRange(6)}
                                     className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
                                 >
-                                    近6个月
+                                    {t('近6个月')}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setQuickDateRange(12)}
                                     className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
                                 >
-                                    近12个月
+                                    {t('近12个月')}
                                 </button>
                             </div>
                         )}
 
                         <div className="space-y-3">
                             <div>
-                                <label className="block text-xs text-gray-500 mb-1">开始日期</label>
+                                <label className="block text-xs text-gray-500 mb-1">{t('开始日期')}</label>
                                 <input
                                     type="date"
                                     value={dateFrom}
@@ -523,7 +525,7 @@ export function ReportsPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs text-gray-500 mb-1">结束日期</label>
+                                <label className="block text-xs text-gray-500 mb-1">{t('结束日期')}</label>
                                 <input
                                     type="date"
                                     value={dateTo}
@@ -546,7 +548,7 @@ export function ReportsPage() {
                             icon={<FileText className="w-5 h-5" />}
                             fullWidth
                         >
-                            生成报表
+                            {t('生成报表')}
                         </Button>
                     </div>
                 </div>

@@ -11,6 +11,7 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { Loading } from '../components/ui/Loading';
 import { Modal } from '../components/ui/Modal';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
 import {
     createTransaction,
@@ -44,6 +45,7 @@ export function DashboardPage() {
     const { user } = useAuth();
     const { showToast } = useToast();
     const location = useLocation();
+    const { t } = useI18n();
 
     // 用户专属的缓存键
     const cacheKey = user?.uid ? `${CACHE_KEY_PREFIX}${user.uid}` : null;
@@ -257,20 +259,20 @@ export function DashboardPage() {
             console.log('Create response:', response); // Debug log
 
             if (response.status === 'successed') {
-                showToast('success', '账目创建成功');
+                showToast('success', t('账目创建成功'));
                 setShowCreateModal(false);
                 clearUninitializedCache();
                 clearMonthlyCacheByDate(data.transaction_date);
                 setTitleType('recent');
                 loadTransactions(undefined, false);
             } else {
-                showToast('error', response.message || '创建失败');
+                showToast('error', response.message || t('创建失败'));
                 // 失败时也关闭弹窗，让用户可以重试
                 setShowCreateModal(false);
             }
         } catch (error) {
             console.error('Create error:', error);
-            showToast('error', '创建失败');
+            showToast('error', t('创建失败'));
             setShowCreateModal(false);
         } finally {
             setActionLoading(false);
@@ -285,17 +287,17 @@ export function DashboardPage() {
             console.log('Update response:', response); // Debug log
 
             if (response.status === 'successed') {
-                showToast('success', '账目更新成功');
+                showToast('success', t('账目更新成功'));
                 clearUninitializedCache();
                 clearMonthlyCacheIfNeeded(data.id);
                 setTitleType('recent');
                 loadTransactions(undefined, false);
             } else {
-                showToast('error', response.message || '更新失败');
+                showToast('error', response.message || t('更新失败'));
             }
         } catch (error) {
             console.error('Update error:', error);
-            showToast('error', '更新失败');
+            showToast('error', t('更新失败'));
         } finally {
             setActionLoading(false);
             setShowEditModal(false);
@@ -313,7 +315,7 @@ export function DashboardPage() {
         setShowDeleteConfirm(false);
 
         if (response.status === 'successed') {
-            showToast('success', `成功删除 ${selectedIds.length} 条账目`);
+            showToast('success', t('成功删除 {count} 条账目', { count: selectedIds.length }));
             // 检查是否有本月的账目被删除
             selectedIds.forEach(id => clearMonthlyCacheIfNeeded(id));
             setSelectedIds([]);
@@ -321,7 +323,7 @@ export function DashboardPage() {
             setTitleType('recent');
             loadTransactions(undefined, false);
         } else {
-            showToast('error', response.message || '删除失败');
+            showToast('error', response.message || t('删除失败'));
         }
     };
 
@@ -329,7 +331,7 @@ export function DashboardPage() {
     const handleAIJournal = async () => {
         if (selectedIds.length === 0) return;
         if (selectedIds.length > 100) {
-            showToast('error', 'AI仕訳一次最多处理100条记录');
+            showToast('error', t('AI仕訳一次最多处理100条记录'));
             return;
         }
 
@@ -339,7 +341,7 @@ export function DashboardPage() {
         setShowAIConfirm(false);
 
         if (response.status === 'successed') {
-            showToast('success', 'AI仕訳处理完成');
+            showToast('success', t('AI仕訳处理完成'));
             // 检查是否有本月的账目被处理
             selectedIds.forEach(id => clearMonthlyCacheIfNeeded(id));
             setSelectedIds([]);
@@ -347,7 +349,7 @@ export function DashboardPage() {
             setTitleType('recent');
             loadTransactions(undefined, false);
         } else {
-            showToast('error', response.message || 'AI处理失败');
+            showToast('error', response.message || t('AI处理失败'));
         }
     };
 
@@ -409,7 +411,7 @@ export function DashboardPage() {
                 setHasMore(false);
             }
         } catch {
-            showToast('error', '加载更多失败');
+            showToast('error', t('加载更多失败'));
         } finally {
             setLoadingMore(false);
         }
@@ -419,12 +421,12 @@ export function DashboardPage() {
     const getPageTitle = (): string => {
         switch (titleType) {
             case 'uninitialized':
-                return '未进行仕訳账目';
+                return t('未进行仕訳账目');
             case 'search':
-                return '筛选结果';
+                return t('筛选结果');
             case 'recent':
             default:
-                return '近期编辑账目';
+                return t('近期编辑账目');
         }
     };
 
@@ -454,7 +456,7 @@ export function DashboardPage() {
         return (
             <Layout>
                 <div className="flex items-center justify-center min-h-[60vh]">
-                    <Loading size="lg" text="加载中..." />
+                    <Loading size="lg" text={t('加载中...')} />
                 </div>
             </Layout>
         );
@@ -494,7 +496,7 @@ export function DashboardPage() {
                             loading={loadingMore}
                             icon={<ChevronDown className="w-4 h-4" />}
                         >
-                            加载更多
+                            {t('加载更多')}
                         </Button>
                     </div>
                 )}
@@ -502,8 +504,8 @@ export function DashboardPage() {
                 {/* 显示当前加载数量 */}
                 {titleType === 'recent' && transactions.length > 0 && !localSearchKeyword && (
                     <p className="mt-2 text-center text-sm text-gray-400">
-                        已加载 {transactions.length} 条账目
-                        {!hasMore && '（已全部加载）'}
+                        {t('已加载 {count} 条账目', { count: transactions.length })}
+                        {!hasMore && t('（已全部加载）')}
                     </p>
                 )}
 
@@ -517,7 +519,7 @@ export function DashboardPage() {
             <button
                 onClick={() => setShowCreateModal(true)}
                 className="lg:hidden fixed bottom-20 right-4 z-40 w-14 h-14 bg-sky-600 hover:bg-sky-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95"
-                aria-label="新增账目"
+                aria-label={t('新增账目')}
             >
                 <Plus className="w-6 h-6" />
             </button>
@@ -531,12 +533,12 @@ export function DashboardPage() {
                             <div className="flex items-center justify-between gap-1.5 sm:gap-2">
                                 <div className="flex items-center gap-1 shrink-0">
                                     <span className="text-xs sm:text-sm font-medium text-sky-700 bg-sky-100 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">
-                                        已选 {selectedIds.length} 条
+                                        {t('已选 {count} 条', { count: selectedIds.length })}
                                     </span>
                                     <button
                                         onClick={() => setSelectedIds([])}
                                         className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition-colors"
-                                        title="取消选择"
+                                        title={t('取消选择')}
                                     >
                                         <X className="w-4 h-4" />
                                     </button>
@@ -548,7 +550,7 @@ export function DashboardPage() {
                                         onClick={() => setShowAIConfirm(true)}
                                         className="px-2 sm:px-4 text-xs sm:text-sm justify-center whitespace-nowrap"
                                     >
-                                        AI仕訳
+                                        {t('AI仕訳')}
                                     </Button>
 
                                     <ExportButton
@@ -563,7 +565,7 @@ export function DashboardPage() {
                                         onClick={() => setShowDeleteConfirm(true)}
                                         className="px-2 sm:px-4 text-xs sm:text-sm justify-center whitespace-nowrap"
                                     >
-                                        删除
+                                        {t('删除')}
                                     </Button>
                                 </div>
                             </div>
@@ -576,7 +578,7 @@ export function DashboardPage() {
             <Modal
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
-                title="新增账目"
+                title={t('新增账目')}
                 size="lg"
             >
                 <TransactionForm
@@ -594,7 +596,7 @@ export function DashboardPage() {
                     setShowEditModal(false);
                     setEditingTransaction(null);
                 }}
-                title="编辑账目"
+                title={t('编辑账目')}
                 size="lg"
             >
                 {editingTransaction && (() => {
@@ -664,9 +666,9 @@ export function DashboardPage() {
                 isOpen={showDeleteConfirm}
                 onClose={() => setShowDeleteConfirm(false)}
                 onConfirm={handleDelete}
-                title="确认删除"
-                message={`确定要删除选中的 ${selectedIds.length} 条账目吗？此操作不可恢复。`}
-                confirmText="删除"
+                title={t('确认删除')}
+                message={t('确定要删除选中的 {count} 条账目吗？此操作不可恢复。', { count: selectedIds.length })}
+                confirmText={t('删除')}
                 variant="danger"
                 loading={actionLoading}
             />
@@ -676,9 +678,9 @@ export function DashboardPage() {
                 isOpen={showAIConfirm}
                 onClose={() => setShowAIConfirm(false)}
                 onConfirm={handleAIJournal}
-                title="AI 仕訳"
-                message={`确定要对选中的 ${selectedIds.length} 条账目执行 AI 仕訳吗？`}
-                confirmText="执行"
+                title={t('AI 仕訳')}
+                message={t('确定要对选中的 {count} 条账目执行 AI 仕訳吗？', { count: selectedIds.length })}
+                confirmText={t('执行')}
                 variant="primary"
                 loading={actionLoading}
             />

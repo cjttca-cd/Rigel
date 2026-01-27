@@ -2,6 +2,7 @@ import { Filter, Plus, RefreshCw, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { QueryParams, TransactionStatus } from '../../types';
 import { STATUS_LABELS, TRANSACTION_TYPE_LABELS } from '../../types';
+import { useI18n } from '../../contexts/I18nContext';
 import { Button } from '../ui/Button';
 
 interface SearchPanelProps {
@@ -28,6 +29,7 @@ export function SearchPanel({
     count,
     showHint = true
 }: SearchPanelProps) {
+    const { t } = useI18n();
     const [expanded, setExpanded] = useState(false);
     const [localSearchKeyword, setLocalSearchKeyword] = useState('');
 
@@ -139,7 +141,7 @@ export function SearchPanel({
                 max="9999-12-31"
                 className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 bg-white"
             />
-            <span className="text-gray-400 text-sm shrink-0">至</span>
+            <span className="text-gray-400 text-sm shrink-0">{t('至')}</span>
             <input
                 type="date"
                 value={toValue}
@@ -159,10 +161,10 @@ export function SearchPanel({
                 <div>
                     <h2 className="text-xl font-bold text-gray-900">{title}</h2>
                     <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-sm text-gray-500">共 {count} 条</span>
+                        <span className="text-sm text-gray-500">{t('共 {count} 条', { count })}</span>
                         {showHint && count > 0 && (
                             <span className="text-xs text-gray-400">
-                                *勾选后可批量进行 仕訳 / 导出 / 删除
+                                {t('*勾选后可批量进行 仕訳 / 导出 / 删除')}
                             </span>
                         )}
                     </div>
@@ -179,7 +181,7 @@ export function SearchPanel({
                             type="text"
                             value={localSearchKeyword}
                             onChange={(e) => setLocalSearchKeyword(e.target.value)}
-                            placeholder="搜索列表内账目概述"
+                            placeholder={t('搜索列表内账目概述')}
                             className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition-colors"
                         />
                     </div>
@@ -196,7 +198,7 @@ export function SearchPanel({
                         `}
                     >
                         <Filter className="w-4 h-4" />
-                        <span className="text-sm font-medium">筛选</span>
+                        <span className="text-sm font-medium">{t('筛选')}</span>
                         {enabledCount > 0 && (
                             <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-semibold bg-sky-600 text-white rounded-full">
                                 {enabledCount}
@@ -210,7 +212,7 @@ export function SearchPanel({
                         icon={<Plus className="w-4 h-4" />}
                         className="shrink-0"
                     >
-                        新增账目
+                        {t('新增账目')}
                     </Button>
                 </div>
             </div>
@@ -221,7 +223,7 @@ export function SearchPanel({
                 <div className="flex items-center justify-between">
                     <div className="flex items-baseline gap-2">
                         <h2 className="text-lg font-bold text-gray-900">{title}</h2>
-                        <span className="text-sm text-gray-500">共 {count} 条</span>
+                        <span className="text-sm text-gray-500">{t('共 {count} 条', { count })}</span>
                     </div>
                 </div>
 
@@ -236,7 +238,7 @@ export function SearchPanel({
                             type="text"
                             value={localSearchKeyword}
                             onChange={(e) => setLocalSearchKeyword(e.target.value)}
-                            placeholder="搜索列表内账目概述"
+                            placeholder={t('搜索列表内账目概述')}
                             className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition-colors"
                         />
                     </div>
@@ -271,7 +273,7 @@ export function SearchPanel({
                             <FilterCheckbox
                                 checked={enableTransactionDate}
                                 onChange={setEnableTransactionDate}
-                                label="发生日期"
+                                label={t('发生日期')}
                             />
                             {enableTransactionDate && (
                                 <DateRangeInput
@@ -288,7 +290,7 @@ export function SearchPanel({
                             <FilterCheckbox
                                 checked={enableUpdatedDate}
                                 onChange={setEnableUpdatedDate}
-                                label="更新日期"
+                                label={t('更新日期')}
                             />
                             {enableUpdatedDate && (
                                 <DateRangeInput
@@ -305,7 +307,7 @@ export function SearchPanel({
                             <FilterCheckbox
                                 checked={enableTransactionType}
                                 onChange={setEnableTransactionType}
-                                label="类型"
+                                label={t('类型')}
                             />
                             {enableTransactionType && (
                                 <div className="flex flex-wrap gap-2 ml-6 animate-fade-in">
@@ -335,7 +337,7 @@ export function SearchPanel({
                             <FilterCheckbox
                                 checked={enableStatus}
                                 onChange={setEnableStatus}
-                                label="状态"
+                                label={t('状态')}
                             />
                             {enableStatus && (
                                 <div className="flex flex-wrap gap-2 ml-6 animate-fade-in">
@@ -370,14 +372,14 @@ export function SearchPanel({
                             onClick={handleReset}
                             icon={<RefreshCw className="w-4 h-4" />}
                         >
-                            重置
+                            {t('重置')}
                         </Button>
                         <Button
                             onClick={handleSearch}
                             disabled={loading || enabledCount === 0}
                             icon={<Search className="w-4 h-4" />}
                         >
-                            应用筛选
+                            {t('应用筛选')}
                         </Button>
                     </div>
                 </div>
