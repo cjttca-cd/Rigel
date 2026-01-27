@@ -51,8 +51,8 @@ function LangRoutes() {
 
   if (!isSupportedLang(lang)) {
     const restPath = location.pathname.replace(/^\/[^/]+/, '');
-    const target = `/zh${restPath || ''}${location.search}`;
-    return <Navigate to={target || '/zh'} replace />;
+    const target = `/ja${restPath || ''}${location.search}`;
+    return <Navigate to={target || '/ja'} replace />;
   }
 
   return (
@@ -120,9 +120,9 @@ function LangRoutes() {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/zh" replace />} />
+      <Route path="/" element={<Navigate to="/ja" replace />} />
       <Route path="/:lang/*" element={<LangRoutes />} />
-      <Route path="*" element={<Navigate to="/zh" replace />} />
+      <Route path="*" element={<Navigate to="/ja" replace />} />
     </Routes>
   );
 }

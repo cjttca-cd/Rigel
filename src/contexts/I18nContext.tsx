@@ -727,7 +727,7 @@ function interpolate(template: string, vars?: Record<string, string | number>) {
 export function I18nProvider({ lang, children }: I18nProviderProps) {
     const value = useMemo<I18nContextValue>(() => {
         const t = (key: string, vars?: Record<string, string | number>) => {
-            const translation = translations[lang]?.[key] ?? translations.zh[key] ?? key;
+            const translation = translations[lang]?.[key] ?? translations.ja[key] ?? key;
             return interpolate(translation, vars);
         };
         const withLang = (path: string) => {
