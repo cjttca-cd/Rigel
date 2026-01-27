@@ -22,12 +22,22 @@ const firebaseConfig = {
     appId: config.FIREBASE_APP_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+// Detect missing config (common in local dev) and avoid hard crash/blank page
+const isFirebaseConfigured = Boolean(
+    firebaseConfig.apiKey &&
+    firebaseConfig.authDomain &&
+    firebaseConfig.projectId &&
+    firebaseConfig.appId
+);
+
+// Initialize Firebase only when configured
+const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
+export const auth = app ? getAuth(app) : null;
 
 // Google Auth Provider
 const googleProvider = new GoogleAuthProvider();
+
+const notConfigured = () => ({ success: false as const, error: 'Firebase 未配置：请设置 .env 或 window.__RUNTIME_CONFIG__' });
 
 // Error message translations
 const getAuthErrorMessage = (error: Error): string => {
@@ -50,6 +60,7 @@ const getAuthErrorMessage = (error: Error): string => {
 
 // Sign in with email and password
 export const signInWithEmail = async (email: string, password: string) => {
+    if (!auth) return notConfigured();
     try {
         await signInWithEmailAndPassword(auth, email, password);
         return { success: true, error: null };
@@ -60,6 +71,7 @@ export const signInWithEmail = async (email: string, password: string) => {
 
 // Sign up with email and password
 export const signUpWithEmail = async (email: string, password: string) => {
+    if (!auth) return notConfigured();
     try {
         await createUserWithEmailAndPassword(auth, email, password);
         return { success: true, error: null };
@@ -70,6 +82,7 @@ export const signUpWithEmail = async (email: string, password: string) => {
 
 // Sign in with Google
 export const signInWithGoogle = async () => {
+    if (!auth) return notConfigured();
     try {
         await signInWithPopup(auth, googleProvider);
         return { success: true, error: null };
@@ -80,6 +93,7 @@ export const signInWithGoogle = async () => {
 
 // Send password reset email
 export const sendPasswordReset = async (email: string) => {
+    if (!auth) return notConfigured();
     try {
         await sendPasswordResetEmail(auth, email);
         return { success: true, error: null };
@@ -90,6 +104,7 @@ export const sendPasswordReset = async (email: string) => {
 
 // Sign out
 export const signOut = async () => {
+    if (!auth) return notConfigured();
     try {
         await firebaseSignOut(auth);
         // Clear all cached data on sign out
@@ -102,6 +117,7 @@ export const signOut = async () => {
 
 // Get current user's ID token for API calls
 export const getIdToken = async (): Promise<string | null> => {
+    if (!auth) return null;
     const user = auth.currentUser;
     if (!user) return null;
 
@@ -116,10 +132,15 @@ export const getIdToken = async (): Promise<string | null> => {
 export const subscribeToAuthChanges = (
     callback: (user: FirebaseUser | null) => void
 ) => {
+    if (!auth) {
+        // In local dev without firebase config, don't crash; treat as signed out.
+        callback(null);
+        return () => { };
+    }
     return onAuthStateChanged(auth, callback);
 };
 
 // Get current user UID - useful for cache keys
 export const getCurrentUserUid = (): string | null => {
-    return auth.currentUser?.uid || null;
+    return auth?.currentUser?.uid || null;
 };
