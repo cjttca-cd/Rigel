@@ -285,6 +285,7 @@ export function SearchPanel({
                                     toValue={dateTo}
                                     onFromChange={setDateFrom}
                                     onToChange={setDateTo}
+                                    t={t}
                                 />
                             )}
                         </div>
@@ -302,6 +303,7 @@ export function SearchPanel({
                                     toValue={updatedTo}
                                     onFromChange={setUpdatedFrom}
                                     onToChange={setUpdatedTo}
+                                    t={t}
                                 />
                             )}
                         </div>
