@@ -6,7 +6,7 @@ import {
     useEffect,
     useState
 } from 'react';
-import { subscribeToAuthChanges } from '../services/firebase';
+import { isFirebaseConfigured, subscribeToAuthChanges } from '../services/firebase';
 import type { User } from '../types';
 
 interface AuthContextType {
@@ -22,10 +22,26 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState<User | null>(() => {
+        if (!isFirebaseConfigured && localStorage.getItem('rigel_demo_mode') === '1') {
+            return {
+                uid: 'demo',
+                email: 'demo@local',
+                displayName: 'Demo',
+                photoURL: null
+            };
+        }
+        return null;
+    });
+
+    const [loading, setLoading] = useState(() => {
+        // If firebase isn't configured, we can determine auth state synchronously
+        return isFirebaseConfigured;
+    });
 
     useEffect(() => {
+        if (!isFirebaseConfigured) return;
+
         const unsubscribe = subscribeToAuthChanges((firebaseUser: FirebaseUser | null) => {
             if (firebaseUser) {
                 setUser({

@@ -5,7 +5,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
-import { signInWithEmail, signInWithGoogle } from '../services/firebase';
+import { isFirebaseConfigured, signInWithEmail, signInWithGoogle } from '../services/firebase';
 
 import { LanguageSwitcherInline } from '../components/ui/LanguageSwitcherInline';
 
@@ -182,6 +182,25 @@ export function LoginPage() {
 
                     {/* 登录表单 */}
                     <div className="bg-white py-8 px-6 shadow-sm rounded-2xl border border-gray-100">
+                        {!isFirebaseConfigured && (
+                            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                                <div className="flex items-start justify-between gap-3">
+                                    <p className="leading-snug">
+                                        当前未配置 Firebase 环境变量，仅可预览登录页。
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            localStorage.setItem('rigel_demo_mode', '1');
+                                            navigate(withLang('/'));
+                                        }}
+                                        className="shrink-0 rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 focus-visible:ring-offset-2"
+                                    >
+                                        Demo
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <Input
                                 ref={emailInputRef}

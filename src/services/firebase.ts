@@ -23,7 +23,7 @@ const firebaseConfig = {
 };
 
 // Detect missing config (common in local dev) and avoid hard crash/blank page
-const isFirebaseConfigured = Boolean(
+export const isFirebaseConfigured = Boolean(
     firebaseConfig.apiKey &&
     firebaseConfig.authDomain &&
     firebaseConfig.projectId &&
@@ -104,7 +104,12 @@ export const sendPasswordReset = async (email: string) => {
 
 // Sign out
 export const signOut = async () => {
-    if (!auth) return notConfigured();
+    if (!auth) {
+        // Demo/local mode: clear demo flag and cached data
+        localStorage.removeItem('rigel_demo_mode');
+        localStorage.removeItem('journal_transactions_cache');
+        return { success: true, error: null };
+    }
     try {
         await firebaseSignOut(auth);
         // Clear all cached data on sign out
