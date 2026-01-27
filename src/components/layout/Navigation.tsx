@@ -71,7 +71,7 @@ export function Navigation() {
                                     <Link
                                         key={item.path}
                                         to={withLang(item.path)}
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${isActive(item.path)
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 focus-visible:ring-offset-2 ${isActive(item.path)
                                             ? 'bg-sky-50 text-sky-600'
                                             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                                             }`}
@@ -240,7 +240,7 @@ export function Navigation() {
                         <Link
                             key={item.path}
                             to={withLang(item.path)}
-                            className={`flex flex-col items-center justify-center gap-1 py-2 px-4 rounded-lg transition-all ${isActive(item.path)
+                            className={`flex flex-col items-center justify-center gap-1 py-2 px-4 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 focus-visible:ring-offset-2 ${isActive(item.path)
                                 ? 'text-sky-600'
                                 : 'text-gray-500'
                                 }`}

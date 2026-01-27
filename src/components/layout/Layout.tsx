@@ -8,9 +8,9 @@ interface LayoutProps {
 
 export function Layout({ children, wide = false }: LayoutProps) {
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 overflow-x-hidden">
             <Navigation />
-            <main className={`mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6 ${wide ? 'max-w-[1600px]' : 'max-w-7xl'
+            <main className={`mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-6 ${wide ? 'max-w-[1600px]' : 'max-w-7xl'
                 }`}>
                 {children}
             </main>

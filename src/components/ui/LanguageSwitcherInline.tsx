@@ -34,7 +34,7 @@ export function LanguageSwitcherInline({
             type="button"
             onClick={() => navigate(`/${item.lang}${restPath}${location.search}`)}
             className={
-              `px-2 py-1 rounded-lg text-xs font-medium transition-colors ` +
+              `px-3 py-2 min-h-[44px] min-w-[44px] rounded-lg text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 focus-visible:ring-offset-2 ` +
               (active
                 ? 'bg-gray-900 text-white'
                 : 'bg-white/70 text-gray-700 hover:bg-white border border-gray-200')
