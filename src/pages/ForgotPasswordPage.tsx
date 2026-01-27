@@ -3,11 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
 import { sendPasswordReset } from '../services/firebase';
 
 export function ForgotPasswordPage() {
     const { showToast } = useToast();
+    const { t, withLang } = useI18n();
     const emailInputRef = useRef<HTMLInputElement>(null);
 
     const [email, setEmail] = useState('');
@@ -23,12 +25,12 @@ export function ForgotPasswordPage() {
         e.preventDefault();
 
         if (!email) {
-            setError('请输入邮箱');
+            setError(t('请输入邮箱'));
             return;
         }
 
         if (!/\S+@\S+\.\S+/.test(email)) {
-            setError('邮箱格式不正确');
+            setError(t('邮箱格式不正确'));
             return;
         }
 
@@ -39,9 +41,9 @@ export function ForgotPasswordPage() {
 
         if (result.success) {
             setSent(true);
-            showToast('success', '重置邮件已发送');
+            showToast('success', t('重置邮件已发送'));
         } else {
-            showToast('error', result.error || '发送失败');
+            showToast('error', result.error || t('发送失败'));
         }
     };
 
@@ -55,17 +57,17 @@ export function ForgotPasswordPage() {
                             <CheckCircle className="w-10 h-10 text-white" />
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                            邮件已发送
+                            {t('邮件已发送')}
                         </h2>
                         <p className="text-gray-500 mb-8">
-                            我们已向 <span className="font-medium text-gray-900">{email}</span> 发送了密码重置链接，请查收邮件。
+                            {t('我们已向 {email} 发送了密码重置链接，请查收邮件。', { email })}
                         </p>
                         <Link
-                            to="/login"
+                            to={withLang('/login')}
                             className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-medium text-white bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 rounded-xl transition-all shadow-lg shadow-sky-500/25"
                         >
                             <ArrowLeft className="w-4 h-4" />
-                            返回登录
+                            {t('返回登录')}
                         </Link>
                     </div>
                 </div>
@@ -78,19 +80,19 @@ export function ForgotPasswordPage() {
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 {/* Logo */}
                 <div className="flex justify-center">
-                    <Link to="/login" className="flex items-center gap-3">
+                    <Link to={withLang('/login')} className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-sky-500/30">
                             <BookOpen className="w-6 h-6 text-white" />
                         </div>
-                        <span className="text-2xl font-bold text-gray-900">财会助手 Rigel</span>
+                        <span className="text-2xl font-bold text-gray-900">{t('财会助手 Rigel')}</span>
                     </Link>
                 </div>
 
                 <h1 className="mt-8 text-center text-2xl font-bold text-gray-900">
-                    重置密码
+                    {t('重置密码')}
                 </h1>
                 <p className="mt-2 text-center text-gray-500">
-                    输入您的邮箱，我们将发送重置链接
+                    {t('输入您的邮箱，我们将发送重置链接')}
                 </p>
             </div>
 
@@ -99,7 +101,7 @@ export function ForgotPasswordPage() {
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <Input
                             ref={emailInputRef}
-                            label="邮箱地址"
+                            label={t('邮箱地址')}
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -116,18 +118,18 @@ export function ForgotPasswordPage() {
                             size="lg"
                             icon={<Send className="w-5 h-5" />}
                         >
-                            发送重置链接
+                            {t('发送重置链接')}
                         </Button>
                     </form>
 
                     {/* 返回登录 */}
                     <div className="mt-6 text-center">
                         <Link
-                            to="/login"
+                            to={withLang('/login')}
                             className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
                         >
                             <ArrowLeft className="w-4 h-4" />
-                            返回登录
+                            {t('返回登录')}
                         </Link>
                     </div>
                 </div>

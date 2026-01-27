@@ -3,12 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
 import { signUpWithEmail } from '../services/firebase';
 
 export function RegisterPage() {
     const navigate = useNavigate();
     const { showToast } = useToast();
+    const { t, withLang } = useI18n();
     const emailInputRef = useRef<HTMLInputElement>(null);
 
     const [email, setEmail] = useState('');
@@ -25,19 +27,19 @@ export function RegisterPage() {
         const newErrors: { email?: string; password?: string; confirmPassword?: string } = {};
 
         if (!email) {
-            newErrors.email = '请输入邮箱';
+            newErrors.email = t('请输入邮箱');
         } else if (!/\S+@\S+\.\S+/.test(email)) {
-            newErrors.email = '邮箱格式不正确';
+            newErrors.email = t('邮箱格式不正确');
         }
 
         if (!password) {
-            newErrors.password = '请输入密码';
+            newErrors.password = t('请输入密码');
         } else if (password.length < 6) {
-            newErrors.password = '密码至少6位';
+            newErrors.password = t('密码至少6位');
         }
 
         if (password !== confirmPassword) {
-            newErrors.confirmPassword = '两次密码不一致';
+            newErrors.confirmPassword = t('两次密码不一致');
         }
 
         setErrors(newErrors);
@@ -53,10 +55,10 @@ export function RegisterPage() {
         setLoading(false);
 
         if (result.success) {
-            showToast('success', '注册成功');
-            navigate('/');
+            showToast('success', t('注册成功'));
+            navigate(withLang('/'));
         } else {
-            showToast('error', result.error || '注册失败');
+            showToast('error', result.error || t('注册失败'));
         }
     };
 

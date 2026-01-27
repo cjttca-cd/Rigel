@@ -1,4 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
+import { useI18n } from '../../contexts/I18nContext';
 import { Button } from './Button';
 
 interface ConfirmDialogProps {
@@ -19,11 +20,14 @@ export function ConfirmDialog({
     onConfirm,
     title,
     message,
-    confirmText = '确认',
-    cancelText = '取消',
+    confirmText,
+    cancelText,
     variant = 'primary',
     loading = false
 }: ConfirmDialogProps) {
+    const { t } = useI18n();
+    const finalConfirmText = confirmText ?? t('确认');
+    const finalCancelText = cancelText ?? t('取消');
     if (!isOpen) return null;
 
     return (
@@ -68,7 +72,7 @@ export function ConfirmDialog({
                             disabled={loading}
                             fullWidth
                         >
-                            {cancelText}
+                            {finalCancelText}
                         </Button>
                         <Button
                             variant={variant === 'danger' ? 'danger' : 'primary'}
@@ -76,7 +80,7 @@ export function ConfirmDialog({
                             loading={loading}
                             fullWidth
                         >
-                            {confirmText}
+                            {finalConfirmText}
                         </Button>
                     </div>
                 </div>

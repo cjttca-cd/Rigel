@@ -2,6 +2,7 @@ import { BarChart3, BookOpen, FileText, Home, LogOut, Menu, User, X } from 'luci
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { supportedLangs, useI18n } from '../../contexts/I18nContext';
 import { signOut } from '../../services/firebase';
 
 interface NavItem {
@@ -19,6 +20,7 @@ const navItems: NavItem[] = [
 export function Navigation() {
     const { user } = useAuth();
     const location = useLocation();
+    const { lang, t, withLang } = useI18n();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -30,12 +32,20 @@ export function Navigation() {
         }
     };
 
+    const stripLangPath = location.pathname.replace(/^\/(zh|en|ja)(?=\/|$)/, '') || '/';
+
     const isActive = (path: string) => {
         if (path === '/') {
-            return location.pathname === '/';
+            return stripLangPath === '/';
         }
-        return location.pathname.startsWith(path);
+        return stripLangPath.startsWith(path);
     };
+
+    const basePath = stripLangPath === '/' ? '' : stripLangPath;
+    const languageLinks = supportedLangs.map((targetLang) => ({
+        lang: targetLang,
+        to: `/${targetLang}${basePath}${location.search}`
+    }));
 
     return (
         <>
@@ -46,12 +56,12 @@ export function Navigation() {
                         {/* Logo + 导航链接 */}
                         <div className="flex items-center gap-8">
                             {/* Logo */}
-                            <Link to="/" className="flex items-center gap-3">
+                            <Link to={withLang('/')} className="flex items-center gap-3">
                                 <div className="w-9 h-9 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-sky-500/25">
                                     <BookOpen className="w-5 h-5 text-white" />
                                 </div>
                                 <span className="text-lg font-semibold text-gray-900">
-                                    财会助手 Rigel
+                                    {t('财会助手 Rigel')}
                                 </span>
                             </Link>
 
@@ -60,67 +70,87 @@ export function Navigation() {
                                 {navItems.map((item) => (
                                     <Link
                                         key={item.path}
-                                        to={item.path}
+                                        to={withLang(item.path)}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${isActive(item.path)
                                             ? 'bg-sky-50 text-sky-600'
                                             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                                             }`}
                                     >
                                         {item.icon}
-                                        {item.label}
+                                        {t(item.label)}
                                     </Link>
                                 ))}
                             </nav>
                         </div>
 
                         {/* 用户菜单 */}
-                        <div className="relative">
-                            <button
-                                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                                className="flex items-center gap-3 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                            >
-                                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                                    {user?.photoURL ? (
-                                        <img
-                                            src={user.photoURL}
-                                            alt=""
-                                            className="w-8 h-8 rounded-full object-cover"
-                                        />
-                                    ) : (
-                                        <User className="w-4 h-4 text-gray-500" />
-                                    )}
-                                </div>
-                                <span className="text-sm text-gray-700 font-medium max-w-[150px] truncate">
-                                    {user?.email?.split('@')[0] || '用户'}
-                                </span>
-                            </button>
-
-                            {/* 用户下拉菜单 */}
-                            {userMenuOpen && (
-                                <>
-                                    <div
-                                        className="fixed inset-0 z-40"
-                                        onClick={() => setUserMenuOpen(false)}
-                                    />
-                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
-                                        <div className="px-4 py-3 border-b border-gray-100">
-                                            <p className="text-sm font-medium text-gray-900 truncate">
-                                                {user?.displayName || '用户'}
-                                            </p>
-                                            <p className="text-xs text-gray-500 truncate">
-                                                {user?.email}
-                                            </p>
-                                        </div>
-                                        <button
-                                            onClick={handleSignOut}
-                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <span className="text-xs uppercase tracking-wide text-gray-400">{t('语言')}</span>
+                                <div className="flex items-center gap-2">
+                                    {languageLinks.map((item) => (
+                                        <Link
+                                            key={item.lang}
+                                            to={item.to}
+                                            className={`text-xs font-medium transition-colors ${item.lang === lang
+                                                ? 'text-sky-600'
+                                                : 'text-gray-500 hover:text-gray-700'
+                                                }`}
                                         >
-                                            <LogOut className="w-4 h-4" />
-                                            退出登录
-                                        </button>
+                                            {item.lang === 'zh' ? t('中文') : item.lang === 'en' ? t('English') : t('日本語')}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="relative">
+                                <button
+                                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                                    className="flex items-center gap-3 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                        {user?.photoURL ? (
+                                            <img
+                                                src={user.photoURL}
+                                                alt=""
+                                                className="w-8 h-8 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <User className="w-4 h-4 text-gray-500" />
+                                        )}
                                     </div>
-                                </>
-                            )}
+                                    <span className="text-sm text-gray-700 font-medium max-w-[150px] truncate">
+                                        {user?.email?.split('@')[0] || t('用户')}
+                                    </span>
+                                </button>
+
+                                {/* 用户下拉菜单 */}
+                                {userMenuOpen && (
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-40"
+                                            onClick={() => setUserMenuOpen(false)}
+                                        />
+                                        <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                                            <div className="px-4 py-3 border-b border-gray-100">
+                                                <p className="text-sm font-medium text-gray-900 truncate">
+                                                    {user?.displayName || t('用户')}
+                                                </p>
+                                                <p className="text-xs text-gray-500 truncate">
+                                                    {user?.email}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={handleSignOut}
+                                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                            >
+                                                <LogOut className="w-4 h-4" />
+                                                {t('退出登录')}
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -130,12 +160,12 @@ export function Navigation() {
             <header className="md:hidden bg-white border-b border-gray-200 sticky top-0 z-40">
                 <div className="flex items-center justify-between h-14 px-4">
                     {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2">
+                    <Link to={withLang('/')} className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-lg flex items-center justify-center">
                             <BookOpen className="w-4 h-4 text-white" />
                         </div>
                         <span className="text-base font-semibold text-gray-900">
-                            财会助手 Rigel
+                            {t('财会助手 Rigel')}
                         </span>
                     </Link>
 
@@ -170,7 +200,7 @@ export function Navigation() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-gray-900 truncate">
-                                        {user?.displayName || '用户'}
+                                        {user?.displayName || t('用户')}
                                     </p>
                                     <p className="text-xs text-gray-500 truncate">
                                         {user?.email}
@@ -178,12 +208,25 @@ export function Navigation() {
                                 </div>
                             </div>
 
+                            <div className="flex items-center gap-2 px-3 text-xs uppercase tracking-wide text-gray-400">
+                                {t('语言')}
+                                {languageLinks.map((item) => (
+                                    <Link
+                                        key={item.lang}
+                                        to={item.to}
+                                        className={`text-xs font-medium ${item.lang === lang ? 'text-sky-600' : 'text-gray-500'}`}
+                                    >
+                                        {item.lang === 'zh' ? t('中文') : item.lang === 'en' ? t('English') : t('日本語')}
+                                    </Link>
+                                ))}
+                            </div>
+
                             <button
                                 onClick={handleSignOut}
                                 className="w-full flex items-center gap-3 px-3 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                             >
                                 <LogOut className="w-5 h-5" />
-                                退出登录
+                                {t('退出登录')}
                             </button>
                         </div>
                     </div>
@@ -196,14 +239,14 @@ export function Navigation() {
                     {navItems.map((item) => (
                         <Link
                             key={item.path}
-                            to={item.path}
+                            to={withLang(item.path)}
                             className={`flex flex-col items-center justify-center gap-1 py-2 px-4 rounded-lg transition-all ${isActive(item.path)
                                 ? 'text-sky-600'
                                 : 'text-gray-500'
                                 }`}
                         >
                             {item.icon}
-                            <span className="text-xs font-medium">{item.label}</span>
+                            <span className="text-xs font-medium">{t(item.label)}</span>
                         </Link>
                     ))}
                 </div>

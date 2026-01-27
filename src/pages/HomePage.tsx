@@ -14,6 +14,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { Loading } from '../components/ui/Loading';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 import { queryTransactions } from '../services/api';
 import type { Transaction } from '../types';
 
@@ -60,6 +61,7 @@ function isValidTransaction(tx: unknown): tx is Transaction {
 export function HomePage() {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { t, withLang } = useI18n();
 
     // 用户专属的缓存键
     const recentCacheKey = user?.uid ? `${CACHE_KEY_PREFIX}${user.uid}` : null;
@@ -308,7 +310,13 @@ export function HomePage() {
 
     // 获取状态配置
     const getStatusConfig = (status: string | undefined) => {
-        return STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.initialized;
+        const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.initialized;
+        const labelMap: Record<string, string> = {
+            '未仕訳': t('未仕訳'),
+            '已仕訳': t('已仕訳'),
+            '修改': t('修改')
+        };
+        return { ...config, label: labelMap[config.label] || config.label };
     };
 
     // 获取交易金额显示
@@ -322,12 +330,12 @@ export function HomePage() {
 
     // 获取科目名称
     const getAccountName = (tx: Transaction): string => {
-        return tx.debit_item || tx.credit_item || '未分类';
+        return tx.debit_item || tx.credit_item || t('未分类');
     };
 
     // 导航函数
     const handleViewAllUninitialized = () => {
-        navigate('/transactions', {
+        navigate(withLang('/transactions'), {
             state: {
                 preloadedTransactions: uninitializedTransactions,
                 filterType: 'uninitialized',
@@ -336,12 +344,12 @@ export function HomePage() {
         });
     };
 
-    const handleViewMoreRecent = () => navigate('/transactions');
+    const handleViewMoreRecent = () => navigate(withLang('/transactions'));
 
     if (loading) {
         return (
             <Layout>
-                <Loading text="加载中..." />
+                <Loading text={t('加载中...')} />
             </Layout>
         );
     }
@@ -362,8 +370,8 @@ export function HomePage() {
                             {/* 标题区域 */}
                             <div className="flex items-center justify-between mb-4">
                                 <div>
-                                    <p className="text-blue-100 text-sm">你好，{user?.displayName || user?.email?.split('@')[0] || '用户'}</p>
-                                    <h2 className="text-xl font-bold mt-0.5">{currentMonthLabel}概览</h2>
+                                    <p className="text-blue-100 text-sm">{t('你好，{name}', { name: user?.displayName || user?.email?.split('@')[0] || t('用户') })}</p>
+                                    <h2 className="text-xl font-bold mt-0.5">{t('{month}概览', { month: currentMonthLabel })}</h2>
                                 </div>
                                 <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
                                     <BarChart3 className="w-5 h-5" />
@@ -375,14 +383,14 @@ export function HomePage() {
                                 <div className="bg-white/10 backdrop-blur rounded-xl p-4">
                                     <div className="flex items-center gap-2 text-blue-100 text-sm mb-1">
                                         <ArrowUpRight className="w-4 h-4" />
-                                        <span>收入</span>
+                                        <span>{t('收入')}</span>
                                     </div>
                                     <p className="text-2xl font-bold">{formatAmount(monthlyStats.income)}</p>
                                 </div>
                                 <div className="bg-white/10 backdrop-blur rounded-xl p-4">
                                     <div className="flex items-center gap-2 text-blue-100 text-sm mb-1">
                                         <ArrowDownRight className="w-4 h-4" />
-                                        <span>支出</span>
+                                        <span>{t('支出')}</span>
                                     </div>
                                     <p className="text-2xl font-bold">{formatAmount(monthlyStats.expense)}</p>
                                 </div>
@@ -401,13 +409,13 @@ export function HomePage() {
                                         <Bot className="w-6 h-6" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="font-semibold">AI 仕訳助手</h3>
+                                        <h3 className="font-semibold">{t('AI 仕訳助手')}</h3>
                                         <p className="text-emerald-100 text-sm mt-1">
-                                            有 {uninitializedCount} 条需要进行 AI 仕訳
+                                            {t('有 {count} 条需要进行 AI 仕訳', { count: uninitializedCount })}
                                         </p>
                                     </div>
                                     <button className="px-4 py-1.5 bg-white text-emerald-600 text-sm font-medium rounded-lg hover:bg-emerald-50 transition-colors shrink-0">
-                                        立即处理
+                                        {t('立即处理')}
                                     </button>
                                 </div>
                             </div>
@@ -421,13 +429,13 @@ export function HomePage() {
                                             <Bot className="w-4 h-4" />
                                         </div>
                                         <p className="text-white font-medium text-sm whitespace-nowrap">
-                                            所有仕訳已完成 <span className="text-emerald-200">✓</span>
+                                            {t('所有仕訳已完成')} <span className="text-emerald-200">✓</span>
                                         </p>
                                     </div>
 
                                     {/* 右侧：快捷报表按钮 */}
                                     <Link
-                                        to="/reports"
+                                        to={withLang('/reports')}
                                         state={{
                                             reportType: 'monthly_chart',
                                             autoGenerate: true,
@@ -437,7 +445,7 @@ export function HomePage() {
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <TrendingUp className="w-4 h-4" />
-                                        <span className="text-sm font-medium whitespace-nowrap">近6月收支</span>
+                                        <span className="text-sm font-medium whitespace-nowrap">{t('近6月收支')}</span>
                                         <ChevronRight className="w-4 h-4" />
                                     </Link>
                                 </div>
@@ -447,12 +455,12 @@ export function HomePage() {
                         {/* 近期编辑账目 */}
                         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
                             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                                <h2 className="text-lg font-semibold text-gray-900">近期编辑账目</h2>
+                                <h2 className="text-lg font-semibold text-gray-900">{t('近期编辑账目')}</h2>
                                 <button
                                     onClick={handleViewMoreRecent}
                                     className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
                                 >
-                                    查看全部
+                                    {t('查看全部')}
                                     <ChevronRight className="w-4 h-4" />
                                 </button>
                             </div>
@@ -489,7 +497,7 @@ export function HomePage() {
                                 </div>
                             ) : (
                                 <div className="px-6 py-12 text-center">
-                                    <p className="text-gray-500">暂无账目记录</p>
+                                    <p className="text-gray-500">{t('暂无账目记录')}</p>
                                 </div>
                             )}
                         </div>
@@ -499,27 +507,27 @@ export function HomePage() {
                     <div className="space-y-4">
                         {/* 快捷操作 */}
                         <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                            <h3 className="font-semibold text-gray-900 mb-4">快捷操作</h3>
+                            <h3 className="font-semibold text-gray-900 mb-4">{t('快捷操作')}</h3>
                             <div className="space-y-3">
                                 <button
-                                    onClick={() => navigate('/transactions', { state: { openCreate: true } })}
+                                    onClick={() => navigate(withLang('/transactions'), { state: { openCreate: true } })}
                                     className="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors group"
                                 >
                                     <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
                                         <Plus className="w-5 h-5 text-white" />
                                     </div>
-                                    <span className="font-medium text-gray-900">新增账目</span>
+                                    <span className="font-medium text-gray-900">{t('新增账目')}</span>
                                     <ArrowRight className="w-4 h-4 text-gray-400 ml-auto group-hover:text-blue-500 transition-colors" />
                                 </button>
                                 <Link
-                                    to="/reports"
+                                    to={withLang('/reports')}
                                     state={{ reportType: 'monthly_chart' }}
                                     className="w-full flex items-center gap-3 p-3 rounded-xl bg-violet-50 hover:bg-violet-100 transition-colors group"
                                 >
                                     <div className="w-10 h-10 bg-violet-500 rounded-lg flex items-center justify-center">
                                         <TrendingUp className="w-5 h-5 text-white" />
                                     </div>
-                                    <span className="font-medium text-gray-900">月度收支统计</span>
+                                    <span className="font-medium text-gray-900">{t('月度收支统计')}</span>
                                     <ArrowRight className="w-4 h-4 text-gray-400 ml-auto group-hover:text-violet-500 transition-colors" />
                                 </Link>
                             </div>
@@ -527,10 +535,10 @@ export function HomePage() {
 
                         {/* 財務諸表 */}
                         <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                            <h3 className="font-semibold text-gray-900 mb-4">生成財務諸表</h3>
+                            <h3 className="font-semibold text-gray-900 mb-4">{t('生成財務諸表')}</h3>
                             <div className="space-y-3">
                                 <Link
-                                    to="/reports"
+                                    to={withLang('/reports')}
                                     state={{ reportType: 'trial_balance' }}
                                     className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all group"
                                 >
@@ -538,16 +546,16 @@ export function HomePage() {
                                         <FileText className="w-5 h-5 text-blue-600" />
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="font-medium text-gray-900">試算表</h4>
-                                        <p className="text-xs text-gray-500">各仕訳科目的借贷合计和余额</p>
+                                        <h4 className="font-medium text-gray-900">{t('試算表')}</h4>
+                                        <p className="text-xs text-gray-500">{t('各仕訳科目的借贷合计和余额')}</p>
                                     </div>
                                     <span className="text-xs text-blue-600 font-medium px-2 py-1 bg-blue-100 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                                        查看
+                                        {t('查看')}
                                     </span>
                                 </Link>
 
                                 <Link
-                                    to="/reports"
+                                    to={withLang('/reports')}
                                     state={{ reportType: 'ledger' }}
                                     className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50/50 transition-all group"
                                 >
@@ -555,16 +563,16 @@ export function HomePage() {
                                         <FileText className="w-5 h-5 text-purple-600" />
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="font-medium text-gray-900">総勘定元帳</h4>
-                                        <p className="text-xs text-gray-500">按仕訳科目记录所有账目明细</p>
+                                        <h4 className="font-medium text-gray-900">{t('総勘定元帳')}</h4>
+                                        <p className="text-xs text-gray-500">{t('按仕訳科目记录所有账目明细')}</p>
                                     </div>
                                     <span className="text-xs text-purple-600 font-medium px-2 py-1 bg-purple-100 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                                        查看
+                                        {t('查看')}
                                     </span>
                                 </Link>
 
                                 <Link
-                                    to="/reports"
+                                    to={withLang('/reports')}
                                     state={{ reportType: 'journal' }}
                                     className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-amber-300 hover:bg-amber-50/50 transition-all group"
                                 >
@@ -572,11 +580,11 @@ export function HomePage() {
                                         <FileText className="w-5 h-5 text-amber-600" />
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="font-medium text-gray-900">仕訳帳</h4>
-                                        <p className="text-xs text-gray-500">账本，记录所有账目</p>
+                                        <h4 className="font-medium text-gray-900">{t('仕訳帳')}</h4>
+                                        <p className="text-xs text-gray-500">{t('账本，记录所有账目')}</p>
                                     </div>
                                     <span className="text-xs text-amber-600 font-medium px-2 py-1 bg-amber-100 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                                        查看
+                                        {t('查看')}
                                     </span>
                                 </Link>
                             </div>

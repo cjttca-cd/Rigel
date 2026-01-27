@@ -3,12 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
 import { signInWithEmail, signInWithGoogle } from '../services/firebase';
 
 export function LoginPage() {
     const navigate = useNavigate();
     const { showToast } = useToast();
+    const { t, withLang } = useI18n();
     const emailInputRef = useRef<HTMLInputElement>(null);
 
     const [email, setEmail] = useState('');
@@ -42,15 +44,15 @@ export function LoginPage() {
         const newErrors: { email?: string; password?: string } = {};
 
         if (!email) {
-            newErrors.email = '请输入邮箱';
+            newErrors.email = t('请输入邮箱');
         } else if (!/\S+@\S+\.\S+/.test(email)) {
-            newErrors.email = '邮箱格式不正确';
+            newErrors.email = t('邮箱格式不正确');
         }
 
         if (!password) {
-            newErrors.password = '请输入密码';
+            newErrors.password = t('请输入密码');
         } else if (password.length < 6) {
-            newErrors.password = '密码至少6位';
+            newErrors.password = t('密码至少6位');
         }
 
         setErrors(newErrors);
@@ -72,10 +74,10 @@ export function LoginPage() {
             } else {
                 localStorage.removeItem(REMEMBER_EMAIL_KEY);
             }
-            showToast('success', '登录成功');
-            navigate('/');
+            showToast('success', t('登录成功'));
+            navigate(withLang('/'));
         } else {
-            showToast('error', result.error || '登录失败');
+            showToast('error', result.error || t('登录失败'));
         }
     };
 
@@ -85,10 +87,10 @@ export function LoginPage() {
         setLoading(false);
 
         if (result.success) {
-            showToast('success', '登录成功');
-            navigate('/');
+            showToast('success', t('登录成功'));
+            navigate(withLang('/'));
         } else {
-            showToast('error', result.error || 'Google登录失败');
+            showToast('error', result.error || t('Google登录失败'));
         }
     };
 
@@ -109,16 +111,16 @@ export function LoginPage() {
                         <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
                             <BookOpen className="w-9 h-9 text-white" />
                         </div>
-                        <span className="text-3xl font-bold">财会助手 Rigel</span>
+                        <span className="text-3xl font-bold">{t('财会助手 Rigel')}</span>
                     </div>
 
                     <h1 className="text-4xl font-bold leading-tight mb-6">
-                        智能记账<br />
-                        让财务更简单
+                        {t('智能记账')}<br />
+                        {t('让财务更简单')}
                     </h1>
 
                     <p className="text-lg text-white/80 max-w-md mb-10">
-                        AI 驱动的智能记账系统，自动识别凭证、智能仕訳记录，助力企业财务效率提升。
+                        {t('AI 驱动的智能记账系统，自动识别凭证、智能仕訳记录，助力企业财务效率提升。')}
                     </p>
 
                     {/* 特点列表 */}
@@ -127,7 +129,7 @@ export function LoginPage() {
                             <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                                 <Sparkles className="w-4 h-4" />
                             </div>
-                            <span className="text-white/90">AI 智能识别，自动生成仕訳</span>
+                            <span className="text-white/90">{t('AI 智能识别，自动生成仕訳')}</span>
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
@@ -135,7 +137,7 @@ export function LoginPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <span className="text-white/90">一键生成 試算表 和 総勘定元帳</span>
+                            <span className="text-white/90">{t('一键生成 試算表 和 総勘定元帳')}</span>
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
@@ -143,7 +145,7 @@ export function LoginPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </div>
-                            <span className="text-white/90">安全可靠，数据加密存储</span>
+                            <span className="text-white/90">{t('安全可靠，数据加密存储')}</span>
                         </div>
                     </div>
                 </div>
@@ -158,17 +160,17 @@ export function LoginPage() {
                             <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-sky-500/30">
                                 <BookOpen className="w-6 h-6 text-white" />
                             </div>
-                            <span className="text-2xl font-bold text-gray-900">财会助手 Rigel</span>
+                            <span className="text-2xl font-bold text-gray-900">{t('财会助手 Rigel')}</span>
                         </div>
                     </div>
 
                     {/* 欢迎语 */}
                     <div className="text-center lg:text-left mb-8">
                         <h2 className="text-2xl font-bold text-gray-900">
-                            欢迎回来
+                            {t('欢迎回来')}
                         </h2>
                         <p className="mt-2 text-gray-500">
-                            登录您的账户开始使用
+                            {t('登录您的账户开始使用')}
                         </p>
                     </div>
 
@@ -177,7 +179,7 @@ export function LoginPage() {
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <Input
                                 ref={emailInputRef}
-                                label="邮箱地址"
+                                label={t('邮箱地址')}
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -188,7 +190,7 @@ export function LoginPage() {
                             />
 
                             <Input
-                                label="密码"
+                                label={t('密码')}
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -206,13 +208,13 @@ export function LoginPage() {
                                         onChange={(e) => setRememberMe(e.target.checked)}
                                         className="w-4 h-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
                                     />
-                                    <span className="text-sm text-gray-600">记住我</span>
+                                    <span className="text-sm text-gray-600">{t('记住我')}</span>
                                 </label>
                                 <Link
-                                    to="/forgot-password"
+                                    to={withLang('/forgot-password')}
                                     className="text-sm text-sky-600 hover:text-sky-700 font-medium"
                                 >
-                                    忘记密码？
+                                    {t('忘记密码？')}
                                 </Link>
                             </div>
 
@@ -222,7 +224,7 @@ export function LoginPage() {
                                 fullWidth
                                 size="lg"
                             >
-                                登录
+                                {t('登录')}
                             </Button>
                         </form>
 
@@ -233,7 +235,7 @@ export function LoginPage() {
                                     <div className="w-full border-t border-gray-200" />
                                 </div>
                                 <div className="relative flex justify-center text-sm">
-                                    <span className="px-4 bg-white text-gray-500">或者</span>
+                                    <span className="px-4 bg-white text-gray-500">{t('或者')}</span>
                                 </div>
                             </div>
                         </div>
@@ -255,18 +257,18 @@ export function LoginPage() {
                                     </svg>
                                 }
                             >
-                                使用 Google 账户登录
+                                {t('使用 Google 账户登录')}
                             </Button>
                         </div>
 
                         {/* 注册链接 */}
                         <p className="mt-6 text-center text-sm text-gray-500">
-                            还没有账户？{' '}
+                            {t('还没有账户？')}{' '}
                             <Link
-                                to="/register"
+                                to={withLang('/register')}
                                 className="text-sky-600 hover:text-sky-700 font-medium"
                             >
-                                立即注册
+                                {t('立即注册')}
                             </Link>
                         </p>
                     </div>

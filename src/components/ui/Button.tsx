@@ -1,5 +1,6 @@
 import { Loader2 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { useI18n } from '../../contexts/I18nContext';
 
 interface ButtonProps {
     children: ReactNode;
@@ -28,6 +29,7 @@ export function Button({
     className = '',
     fullWidth = false
 }: ButtonProps) {
+    const { t } = useI18n();
     const baseStyles = 'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variantStyles = {
@@ -55,7 +57,7 @@ export function Button({
             {loading ? (
                 <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>处理中...</span>
+                    <span>{t('处理中...')}</span>
                 </>
             ) : (
                 <>
