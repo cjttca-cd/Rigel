@@ -19,6 +19,64 @@ interface SearchPanelProps {
 const STATUS_OPTIONS: TransactionStatus[] = ['initialized', 'journaled', 'updated'];
 const TRANSACTION_TYPE_OPTIONS: (1 | 2)[] = [1, 2];
 
+function FilterCheckbox({
+    checked,
+    onChange,
+    label
+}: {
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+    label: string;
+}) {
+    return (
+        <label className="flex items-center gap-2 cursor-pointer select-none group">
+            <input
+                type="checkbox"
+                checked={checked}
+                onChange={(e) => onChange(e.target.checked)}
+                className="w-4 h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500 cursor-pointer"
+            />
+            <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{label}</span>
+        </label>
+    );
+}
+
+function DateRangeInput({
+    fromValue,
+    toValue,
+    onFromChange,
+    onToChange,
+    t
+}: {
+    fromValue: string;
+    toValue: string;
+    onFromChange: (value: string) => void;
+    onToChange: (value: string) => void;
+    t: (key: string, vars?: Record<string, unknown>) => string;
+}) {
+    return (
+        <div className="flex items-center gap-2 mt-2 ml-6 animate-fade-in">
+            <input
+                type="date"
+                value={fromValue}
+                onChange={(e) => onFromChange(e.target.value)}
+                min="1900-01-01"
+                max="9999-12-31"
+                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 bg-white"
+            />
+            <span className="text-gray-400 text-sm shrink-0">{t('至')}</span>
+            <input
+                type="date"
+                value={toValue}
+                onChange={(e) => onToChange(e.target.value)}
+                min="1900-01-01"
+                max="9999-12-31"
+                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 bg-white"
+            />
+        </div>
+    );
+}
+
 export function SearchPanel({
     onSearch,
     onReset,
@@ -98,60 +156,6 @@ export function SearchPanel({
         setLocalSearchKeyword('');
         onReset();
     };
-
-    // Checkbox 组件
-    const FilterCheckbox = ({
-        checked,
-        onChange,
-        label
-    }: {
-        checked: boolean;
-        onChange: (checked: boolean) => void;
-        label: string;
-    }) => (
-        <label className="flex items-center gap-2 cursor-pointer select-none group">
-            <input
-                type="checkbox"
-                checked={checked}
-                onChange={(e) => onChange(e.target.checked)}
-                className="w-4 h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500 cursor-pointer"
-            />
-            <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{label}</span>
-        </label>
-    );
-
-    // 日期范围输入组件
-    const DateRangeInput = ({
-        fromValue,
-        toValue,
-        onFromChange,
-        onToChange
-    }: {
-        fromValue: string;
-        toValue: string;
-        onFromChange: (value: string) => void;
-        onToChange: (value: string) => void;
-    }) => (
-        <div className="flex items-center gap-2 mt-2 ml-6 animate-fade-in">
-            <input
-                type="date"
-                value={fromValue}
-                onChange={(e) => onFromChange(e.target.value)}
-                min="1900-01-01"
-                max="9999-12-31"
-                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 bg-white"
-            />
-            <span className="text-gray-400 text-sm shrink-0">{t('至')}</span>
-            <input
-                type="date"
-                value={toValue}
-                onChange={(e) => onToChange(e.target.value)}
-                min="1900-01-01"
-                max="9999-12-31"
-                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 bg-white"
-            />
-        </div>
-    );
 
     return (
         <div className="space-y-3">

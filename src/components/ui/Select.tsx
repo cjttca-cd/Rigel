@@ -1,6 +1,6 @@
 import { ChevronDown } from 'lucide-react';
 import type { SelectHTMLAttributes } from 'react';
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 
 interface SelectOption {
     value: string | number;
@@ -23,7 +23,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(({
     id,
     ...props
 }, ref) => {
-    const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
+    const autoId = useId();
+    const selectId = id || `select-${autoId}`;
 
     const baseStyles = 'w-full bg-white text-gray-900 border rounded-lg transition-all duration-200 focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed appearance-none cursor-pointer';
 

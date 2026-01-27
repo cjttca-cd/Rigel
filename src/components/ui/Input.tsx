@@ -1,5 +1,5 @@
 import type { InputHTMLAttributes, ReactNode } from 'react';
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     label?: string;
@@ -19,7 +19,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
     id,
     ...props
 }, ref) => {
-    const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+    const autoId = useId();
+    const inputId = id || `input-${autoId}`;
 
     const baseInputStyles = 'w-full bg-white text-gray-900 border rounded-lg placeholder:text-gray-400 transition-all duration-200 focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed';
 
