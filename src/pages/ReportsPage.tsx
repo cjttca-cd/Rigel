@@ -438,21 +438,21 @@ export function ReportsPage() {
                                                 ${isSelected ? config.bgLight : 'hover:bg-gray-50'}
                                             `}
                                         >
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-3 min-w-0">
                                                 <div className={`
-                                                    w-10 h-10 rounded-xl flex items-center justify-center
+                                                    w-10 h-10 rounded-xl flex items-center justify-center shrink-0
                                                     ${isSelected ? `bg-gradient-to-br ${config.gradient}` : 'bg-gray-100'}
                                                 `}>
                                                     <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-gray-500'}`} />
                                                 </div>
-                                                <div>
-                                                    <span className={`font-medium ${isSelected ? config.textColor : 'text-gray-900'}`}>
+                                                <div className="min-w-0">
+                                                    <span className={`font-medium block truncate ${isSelected ? config.textColor : 'text-gray-900'}`}>
                                                         {t(config.labelKey)}
                                                     </span>
-                                                    <p className="text-xs text-gray-500">{config.subtitle}</p>
+                                                    <p className="text-xs text-gray-500 truncate">{config.subtitle}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 shrink-0">
                                                 {isSelected && (
                                                     <span className="px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
                                                         {t('已选择')}

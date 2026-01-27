@@ -388,7 +388,7 @@ export function MonthlyChartPanel({ data, dateFrom, dateTo }: MonthlyChartPanelP
 
             {/* 科目筛选 */}
             {chartMode === 'line' && (
-                <div className="px-6 py-3 bg-gray-50 border-b border-gray-100">
+                <div className="px-4 sm:px-6 py-3 bg-gray-50 border-b border-gray-100">
                     <div className="flex items-center gap-4 flex-wrap">
                         <label className="text-sm font-medium text-gray-700">选择科目：</label>
                         <select
@@ -532,7 +532,7 @@ export function MonthlyChartPanel({ data, dateFrom, dateTo }: MonthlyChartPanelP
 
             {/* 底部图例说明 */}
             <div className="px-4 sm:px-6 py-3 bg-gradient-to-r from-gray-50 to-white border-t border-gray-100">
-                <div className="flex items-center justify-center gap-4 sm:gap-6 mb-1.5">
+                <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mb-1.5">
                     <div className="flex items-center gap-1.5">
                         <div className="w-3 h-3 rounded-sm bg-gradient-to-r from-emerald-400 to-cyan-400"></div>
                         <span className="text-xs sm:text-sm text-gray-600">収入（上方）</span>

@@ -1,6 +1,7 @@
 import { ArrowDownWideNarrow, ChevronDown, ChevronUp, Edit3, FileText } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { Transaction } from '../../types';
+import { useI18n } from '../../contexts/I18nContext';
 import { CT_RATE_LABELS, FIN_TYPE_LABELS, STATUS_COLORS, STATUS_LABELS, TRANSACTION_TYPE_LABELS } from '../../types';
 
 interface TransactionTableProps {
@@ -23,6 +24,7 @@ export function TransactionTable({
     loading = false,
     isSearchResult = false
 }: TransactionTableProps) {
+    const { t } = useI18n();
     const [sortField, setSortField] = useState<SortField>('transaction_date');
     const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
@@ -138,13 +140,13 @@ export function TransactionTable({
                 </div>
                 {isSearchResult ? (
                     <>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">没有搜索到符合条件的账目</h3>
-                        <p className="text-gray-500 text-sm">请改变搜索条件再次尝试</p>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">{t('没有搜索到符合条件的账目')}</h3>
+                        <p className="text-gray-500 text-sm">{t('请改变搜索条件再次尝试')}</p>
                     </>
                 ) : (
                     <>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">未发现近期进行操作的账目</h3>
-                        <p className="text-gray-500 text-sm">点击上方"新增"按钮可添加账目，也可定义搜索条件进行搜索</p>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">{t('未发现近期进行操作的账目')}</h3>
+                        <p className="text-gray-500 text-sm">{t('点击上方"新增"按钮可添加账目，也可定义搜索条件进行搜索')}</p>
                     </>
                 )}
             </div>
@@ -306,25 +308,27 @@ export function TransactionTable({
             <div className="lg:hidden">
                 {/* 工具栏：全选 + 排序 */}
                 <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <input
-                            type="checkbox"
-                            checked={allSelected}
-                            onChange={handleSelectAll}
-                            className="w-4 h-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
-                        />
+                    <div className="flex items-center gap-2">
+                        <label className="flex items-center justify-center w-11 h-11 rounded-lg hover:bg-gray-100 transition-colors">
+                            <input
+                                type="checkbox"
+                                checked={allSelected}
+                                onChange={handleSelectAll}
+                                className="w-4 h-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+                            />
+                        </label>
                         <span className="text-sm text-gray-600">
-                            {selectedIds.length > 0 ? `已选择 ${selectedIds.length} 项` : '全选'}
+                            {selectedIds.length > 0 ? t('已选择 {count} 项', { count: selectedIds.length }) : t('全选')}
                         </span>
                     </div>
 
                     {/* 排序下拉 */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                         <ArrowDownWideNarrow className="w-4 h-4 text-gray-400" />
                         <select
                             value={`${sortField}:${sortOrder}`}
                             onChange={handleMobileSortChange}
-                            className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                            className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg px-2 py-1.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 w-[170px] max-w-[170px] truncate"
                         >
                             {SORT_OPTIONS.map((option, idx) => (
                                 <option key={idx} value={`${option.field}:${option.order}`}>
@@ -423,6 +427,7 @@ function MobileTransactionCard({
     formatDate,
     formatAmount
 }: MobileTransactionCardProps) {
+    const { t } = useI18n();
     const [expanded, setExpanded] = useState(false);
 
     // 计算总金额显示
@@ -434,12 +439,14 @@ function MobileTransactionCard({
             <div className="flex gap-3">
                 {/* 勾选框 */}
                 <div className="pt-0.5">
-                    <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={onSelect}
-                        className="w-4 h-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
-                    />
+                    <label className="flex items-center justify-center w-11 h-11 -ml-2 -mt-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={onSelect}
+                            className="w-4 h-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+                        />
+                    </label>
                 </div>
 
                 {/* 内容区 */}
@@ -471,30 +478,30 @@ function MobileTransactionCard({
                     <div className="flex items-center justify-between">
                         <button
                             onClick={() => setExpanded(!expanded)}
-                            className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
+                            className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 min-h-[44px] px-2 -ml-2 rounded-lg"
                         >
                             {expanded ? (
                                 <>
                                     <ChevronUp className="w-3.5 h-3.5" />
-                                    收起详情
+                                    {t('收起详情')}
                                 </>
                             ) : (
                                 <>
                                     <ChevronDown className="w-3.5 h-3.5" />
-                                    展开详情
+                                    {t('展开详情')}
                                 </>
                             )}
                         </button>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                             <span className="text-xs text-gray-400">
-                                {formatDate(tx.updated_at)} 更新
+                                {formatDate(tx.updated_at)} {t('更新')}
                             </span>
                             <button
                                 onClick={onEdit}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                                className="inline-flex items-center gap-1 min-h-[44px] min-w-[44px] px-3 text-xs font-medium text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
                             >
                                 <Edit3 className="w-3 h-3" />
-                                编辑
+                                {t('编辑')}
                             </button>
                         </div>
                     </div>
@@ -503,31 +510,43 @@ function MobileTransactionCard({
                     {expanded && (
                         <div className="mt-3 pt-3 border-t border-gray-100 space-y-1.5 animate-fade-in text-sm">
                             {/* 借方行 */}
-                            <div className="flex items-center justify-between">
-                                <span className="text-gray-500">借方：{tx.debit_item || '-'}</span>
-                                <span className="text-sky-600 font-medium">{formatAmount(tx.debit_amount)}</span>
+                            <div className="flex items-center justify-between gap-3 min-w-0">
+                                <span className="text-gray-500 min-w-0 truncate">
+                                    {t('借方：{item}', { item: tx.debit_item || '-' })}
+                                </span>
+                                <span className="text-sky-600 font-medium shrink-0">{formatAmount(tx.debit_amount)}</span>
                             </div>
                             {/* 貸方行 */}
-                            <div className="flex items-center justify-between">
-                                <span className="text-gray-500">貸方：{tx.credit_item || '-'}</span>
-                                <span className="text-emerald-600 font-medium">{formatAmount(tx.credit_amount)}</span>
+                            <div className="flex items-center justify-between gap-3 min-w-0">
+                                <span className="text-gray-500 min-w-0 truncate">
+                                    {t('貸方：{item}', { item: tx.credit_item || '-' })}
+                                </span>
+                                <span className="text-emerald-600 font-medium shrink-0">{formatAmount(tx.credit_amount)}</span>
                             </div>
                             {/* 税 + 支付方式 */}
-                            <div className="flex items-center justify-between">
-                                <span className="text-gray-500">
-                                    税：{(() => {
-                                        const taxAmount = (tx.debit_ct || 0) > 0 ? tx.debit_ct : tx.credit_ct;
-                                        switch (tx.ct_rate) {
-                                            case 0: return '非课税';
-                                            case 1: return `8%（${formatAmount(taxAmount)}）`;
-                                            case 2: return `10%（${formatAmount(taxAmount)}）`;
-                                            case 3: return `混合（${formatAmount(taxAmount)}）`;
-                                            case 4: return `其他（${formatAmount(taxAmount)}）`;
-                                            default: return '-';
-                                        }
-                                    })()}
+                            <div className="flex items-center justify-between gap-3 min-w-0">
+                                <span className="text-gray-500 min-w-0 truncate">
+                                    {t('税：{tax}', {
+                                        tax: (() => {
+                                            const taxAmount = (tx.debit_ct || 0) > 0 ? tx.debit_ct : tx.credit_ct;
+                                            switch (tx.ct_rate) {
+                                                case 0:
+                                                    return t('非课税');
+                                                case 1:
+                                                    return t('8%（{amount}）', { amount: formatAmount(taxAmount) });
+                                                case 2:
+                                                    return t('10%（{amount}）', { amount: formatAmount(taxAmount) });
+                                                case 3:
+                                                    return t('混合（{amount}）', { amount: formatAmount(taxAmount) });
+                                                case 4:
+                                                    return t('其他（{amount}）', { amount: formatAmount(taxAmount) });
+                                                default:
+                                                    return '-';
+                                            }
+                                        })()
+                                    })}
                                 </span>
-                                <span className="text-gray-700">{tx.fin_type ? FIN_TYPE_LABELS[tx.fin_type as 1 | 2 | 3 | 4 | 5] : '-'}</span>
+                                <span className="text-gray-700 shrink-0">{tx.fin_type ? FIN_TYPE_LABELS[tx.fin_type as 1 | 2 | 3 | 4 | 5] : '-'}</span>
                             </div>
                         </div>
                     )}
