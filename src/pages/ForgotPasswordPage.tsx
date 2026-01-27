@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { LanguageSwitcherInline } from '../components/ui/LanguageSwitcherInline';
 import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
 import { sendPasswordReset } from '../services/firebase';
@@ -50,7 +51,11 @@ export function ForgotPasswordPage() {
     // 发送成功页面
     if (sent) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+                {/* Public page language switcher */}
+                <div className="absolute top-4 right-4 z-50">
+                    <LanguageSwitcherInline />
+                </div>
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="bg-white py-10 px-6 shadow-lg rounded-2xl sm:px-10 border border-gray-100 text-center">
                         <div className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/30">
@@ -76,7 +81,11 @@ export function ForgotPasswordPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+            {/* Public page language switcher */}
+            <div className="absolute top-4 right-4 z-50">
+                <LanguageSwitcherInline />
+            </div>
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 {/* Logo */}
                 <div className="flex justify-center">

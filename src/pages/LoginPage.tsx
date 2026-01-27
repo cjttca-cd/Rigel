@@ -7,6 +7,8 @@ import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
 import { signInWithEmail, signInWithGoogle } from '../services/firebase';
 
+import { LanguageSwitcherInline } from '../components/ui/LanguageSwitcherInline';
+
 export function LoginPage() {
     const navigate = useNavigate();
     const { showToast } = useToast();
@@ -95,7 +97,11 @@ export function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex">
+        <div className="min-h-screen flex relative">
+            {/* Public page language switcher */}
+            <div className="absolute top-4 right-4 z-50">
+                <LanguageSwitcherInline />
+            </div>
             {/* 左侧品牌区域 - 仅桌面端显示 */}
             <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-sky-500 via-indigo-500 to-purple-600 relative overflow-hidden">
                 {/* 装饰性背景元素 */}

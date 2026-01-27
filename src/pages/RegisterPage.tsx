@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { LanguageSwitcherInline } from '../components/ui/LanguageSwitcherInline';
 import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
 import { signUpWithEmail } from '../services/firebase';
@@ -63,7 +64,11 @@ export function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex">
+        <div className="min-h-screen flex relative">
+            {/* Public page language switcher */}
+            <div className="absolute top-4 right-4 z-50">
+                <LanguageSwitcherInline />
+            </div>
             {/* 左侧品牌区域 - 仅桌面端显示 */}
             <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 relative overflow-hidden">
                 {/* 装饰性背景元素 */}
