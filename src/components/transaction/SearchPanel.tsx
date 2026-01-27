@@ -52,7 +52,7 @@ function DateRangeInput({
     toValue: string;
     onFromChange: (value: string) => void;
     onToChange: (value: string) => void;
-    t: (key: string, vars?: Record<string, unknown>) => string;
+    t: (key: string, vars?: Record<string, string | number>) => string;
 }) {
     return (
         <div className="flex items-center gap-2 mt-2 ml-6 animate-fade-in">
