@@ -99,8 +99,9 @@ export function LoginPage() {
     return (
         <div className="min-h-screen flex relative">
             {/* Public page language switcher */}
-            <div className="absolute top-4 right-4 z-50">
-                <LanguageSwitcherInline />
+            {/* Desktop: keep it floating on the top-right */}
+            <div className="hidden lg:block absolute top-4 right-4 z-50">
+                <LanguageSwitcherInline size="md" />
             </div>
             {/* 左侧品牌区域 - 仅桌面端显示 */}
             <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-sky-500 via-indigo-500 to-purple-600 relative overflow-hidden">
@@ -160,6 +161,10 @@ export function LoginPage() {
             {/* 右侧登录表单区域 */}
             <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-16 xl:px-24 bg-gray-50">
                 <div className="w-full max-w-md mx-auto">
+                    {/* Mobile: place language switcher in its own row to avoid overlapping the centered brand */}
+                    <div className="lg:hidden flex justify-end mb-4">
+                        <LanguageSwitcherInline size="md" />
+                    </div>
                     {/* 移动端 Logo */}
                     <div className="lg:hidden flex justify-center mb-8">
                         <div className="flex items-center gap-3">

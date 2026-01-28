@@ -1,6 +1,7 @@
 import { saveAs } from 'file-saver';
 import { Download, FileText } from 'lucide-react';
 import { useState } from 'react';
+import { useI18n } from '../../contexts/I18nContext';
 import { useToast } from '../../contexts/ToastContext';
 import type { TrialBalanceResponse } from '../../types';
 import { generateTrialBalancePDF } from '../../utils/pdfGenerator';
@@ -18,6 +19,7 @@ interface TrialBalanceResultProps {
 
 export function TrialBalanceResult({ isOpen, onClose, data, dateFrom, dateTo }: TrialBalanceResultProps) {
     const { showToast } = useToast();
+    const { t } = useI18n();
     const [showPDFModal, setShowPDFModal] = useState(false);
     const [pdfLoading, setPdfLoading] = useState(false);
 
@@ -65,10 +67,10 @@ export function TrialBalanceResult({ isOpen, onClose, data, dateFrom, dateTo }: 
             const blob = await generateTrialBalancePDF(data, companyName, dateFrom, dateTo);
             saveAs(blob, `試算表_${dateFrom}_${dateTo}.pdf`);
             setShowPDFModal(false);
-            showToast('success', 'PDF 导出成功');
+            showToast('success', t('PDF 导出成功'));
         } catch (error) {
             console.error('PDF export error:', error);
-            showToast('error', 'PDF 导出失败');
+            showToast('error', t('PDF 导出失败'));
         } finally {
             setPdfLoading(false);
         }
@@ -88,11 +90,11 @@ export function TrialBalanceResult({ isOpen, onClose, data, dateFrom, dateTo }: 
                         <table className="w-full text-sm">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-4 py-3 text-right font-medium text-gray-700">借方残高</th>
-                                    <th className="px-4 py-3 text-right font-medium text-gray-700">借方合計</th>
-                                    <th className="px-4 py-3 text-center font-medium text-gray-700">勘定科目</th>
-                                    <th className="px-4 py-3 text-right font-medium text-gray-700">貸方合計</th>
-                                    <th className="px-4 py-3 text-right font-medium text-gray-700">貸方残高</th>
+                                    <th className="px-4 py-3 text-right font-medium text-gray-700">{t('借方残高')}</th>
+                                    <th className="px-4 py-3 text-right font-medium text-gray-700">{t('借方合計')}</th>
+                                    <th className="px-4 py-3 text-center font-medium text-gray-700">{t('勘定科目')}</th>
+                                    <th className="px-4 py-3 text-right font-medium text-gray-700">{t('貸方合計')}</th>
+                                    <th className="px-4 py-3 text-right font-medium text-gray-700">{t('貸方残高')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -125,7 +127,7 @@ export function TrialBalanceResult({ isOpen, onClose, data, dateFrom, dateTo }: 
                                         {formatAmount(data.summary.借方合計)}
                                     </td>
                                     <td className="px-4 py-3 text-center text-gray-900">
-                                        合計
+                                        {t('合計')}
                                     </td>
                                     <td className="px-4 py-3 text-right text-gray-900">
                                         {formatAmount(data.summary.貸方合計)}
@@ -145,16 +147,16 @@ export function TrialBalanceResult({ isOpen, onClose, data, dateFrom, dateTo }: 
                             onClick={handleExportCSV}
                             icon={<Download className="w-4 h-4" />}
                         >
-                            导出 CSV
+                            {t('导出 CSV')}
                         </Button>
                         <Button
                             onClick={() => setShowPDFModal(true)}
                             icon={<FileText className="w-4 h-4" />}
                         >
-                            导出 PDF
+                            {t('导出 PDF')}
                         </Button>
                         <Button variant="ghost" onClick={onClose}>
-                            关闭
+                            {t('关闭')}
                         </Button>
                     </div>
                 </div>
@@ -164,7 +166,7 @@ export function TrialBalanceResult({ isOpen, onClose, data, dateFrom, dateTo }: 
                 isOpen={showPDFModal}
                 onClose={() => setShowPDFModal(false)}
                 onExport={handleExportPDF}
-                title="导出試算表 PDF"
+                title={t('导出試算表 PDF')}
                 loading={pdfLoading}
             />
         </>

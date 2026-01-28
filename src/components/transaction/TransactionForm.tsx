@@ -1,5 +1,6 @@
 import { Camera, Loader2, Sparkles } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useI18n } from '../../contexts/I18nContext';
 import { ocrReceipt } from '../../services/api';
 import type { OCRResult, TransactionInput, TransactionUpdate } from '../../types';
 import { Button } from '../ui/Button';
@@ -50,24 +51,7 @@ const FIELD_LABELS: Record<string, string> = {
     tax_amount: '税额'
 };
 
-// 格式化显示值
-const formatDisplayValue = (field: string, value: unknown): string => {
-    if (value === null || value === undefined) return '-';
-
-    switch (field) {
-        case 'amount_total':
-        case 'tax_amount':
-            return `¥${(value as number).toLocaleString()}`;
-        case 'fin_type':
-            return FIN_TYPE_OPTIONS.find(o => o.value === value)?.label || '-';
-        case 'tax_type':
-            return TAX_TYPE_OPTIONS.find(o => o.value === value)?.label || '-';
-        case 'tax_rate':
-            return TAX_RATE_OPTIONS.find(o => o.value === value)?.label || '-';
-        default:
-            return String(value);
-    }
-};
+// NOTE: formatDisplayValue is defined inside the component so it can use i18n.
 
 interface OcrChange {
     field: string;
@@ -82,7 +66,33 @@ export function TransactionForm({
     onCancel,
     loading = false
 }: TransactionFormProps) {
+    const { t } = useI18n();
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // 格式化显示值（用于 OCR 确认弹窗）
+    const formatDisplayValue = (field: string, value: unknown): string => {
+        if (value === null || value === undefined) return '-';
+
+        switch (field) {
+            case 'amount_total':
+            case 'tax_amount':
+                return `¥${(value as number).toLocaleString()}`;
+            case 'fin_type': {
+                const label = FIN_TYPE_OPTIONS.find(o => o.value === value)?.label;
+                return label ? t(label) : '-';
+            }
+            case 'tax_type': {
+                const label = TAX_TYPE_OPTIONS.find(o => o.value === value)?.label;
+                return label ? t(label) : '-';
+            }
+            case 'tax_rate': {
+                const label = TAX_RATE_OPTIONS.find(o => o.value === value)?.label;
+                return label ? t(label) : '-';
+            }
+            default:
+                return String(value);
+        }
+    };
 
     // 初始值全部设为空/undefined
     const [formData, setFormData] = useState({
@@ -175,46 +185,46 @@ export function TransactionForm({
         const newErrors: Record<string, string> = {};
 
         if (!formData.transaction_date) {
-            newErrors.transaction_date = '请选择发生日期';
+            newErrors.transaction_date = t('请选择发生日期');
         }
 
         if (!formData.description.trim()) {
-            newErrors.description = '请输入概述';
+            newErrors.description = t('请输入概述');
         }
 
         if (formData.amount_total <= 0) {
-            newErrors.amount_total = '金额必须大于0';
+            newErrors.amount_total = t('金额必须大于0');
         }
 
         if (!formData.amount_type) {
-            newErrors.amount_type = '请选择类型';
+            newErrors.amount_type = t('请选择类型');
         }
 
         if (!formData.fin_type) {
-            newErrors.fin_type = '请选择支付方式';
+            newErrors.fin_type = t('请选择支付方式');
         }
 
         if (!formData.tax_type) {
-            newErrors.tax_type = '请选择税务类型';
+            newErrors.tax_type = t('请选择税务类型');
         }
 
         if (formData.tax_type === 2 && !formData.tax_rate) {
-            newErrors.tax_rate = '请选择税率';
+            newErrors.tax_rate = t('请选择税率');
         }
 
         if (formData.tax_type === 2 && (formData.tax_rate === 3 || formData.tax_rate === 4)) {
             if (!formData.tax_amount || formData.tax_amount <= 0) {
-                newErrors.tax_amount = '该税率时必须输入税额';
+                newErrors.tax_amount = t('该税率时必须输入税额');
             }
         }
 
         // 编辑模式：如果原来有科目，不能清空
         if (mode === 'edit' && initialData) {
             if (initialData.debit_item && !formData.debit_item?.trim()) {
-                newErrors.debit_item = '借方科目不能清空';
+                newErrors.debit_item = t('借方科目不能清空');
             }
             if (initialData.credit_item && !formData.credit_item?.trim()) {
-                newErrors.credit_item = '贷方科目不能清空';
+                newErrors.credit_item = t('贷方科目不能清空');
             }
         }
 
@@ -330,15 +340,15 @@ export function TransactionForm({
                         setShowOcrConfirm(true);
                     } else {
                         // 没有变更（或所有值都相同/null）
-                        setOcrError('识别结果与当前数据相同，无需更新');
+                        setOcrError(t('识别结果与当前数据相同，无需更新'));
                     }
                 }
             } else {
-                setOcrError(response.message || '识别失败，请手动输入');
+                setOcrError(response.message || t('识别失败，请手动输入'));
             }
         } catch (error) {
             console.error('OCR error:', error);
-            setOcrError('识别失败，请手动输入');
+            setOcrError(t('识别失败，请手动输入'));
         } finally {
             setOcrLoading(false);
         }
@@ -374,7 +384,7 @@ export function TransactionForm({
                 {/* 1. 概述（最上面，2行高度） */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        概述（可指定仕訳項目）
+                        {t('概述（可指定仕訳項目）')}
                     </label>
                     <textarea
                         value={formData.description}
@@ -389,7 +399,7 @@ export function TransactionForm({
                                 : 'border-gray-300 focus:border-sky-500 focus:ring-sky-500/20'
                             }
                         `}
-                        placeholder="请输入账目概述"
+                        placeholder={t('请输入账目概述')}
                     />
                     {errors.description && (
                         <p className="mt-2 text-sm text-red-500">{errors.description}</p>
@@ -399,17 +409,17 @@ export function TransactionForm({
                 {/* 2. 类型 + AI识图按钮 */}
                 <div className="grid grid-cols-2 gap-4">
                     <Select
-                        label="类型"
+                        label={t('类型')}
                         value={formData.amount_type ?? ''}
                         onChange={(e) => updateField('amount_type', e.target.value ? Number(e.target.value) as 1 | 2 : undefined)}
-                        options={AMOUNT_TYPE_OPTIONS}
-                        placeholder="请选择"
+                        options={AMOUNT_TYPE_OPTIONS.map((o) => ({ ...o, label: t(o.label) }))}
+                        placeholder={t('请选择')}
                         error={errors.amount_type}
                     />
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            AI识图
+                            {t('AI识图')}
                         </label>
                         <input
                             ref={fileInputRef}
@@ -431,7 +441,7 @@ export function TransactionForm({
                                     : 'bg-gradient-to-r from-sky-50 to-violet-50 border-sky-300 text-sky-600 hover:from-sky-100 hover:to-violet-100 hover:border-sky-400'
                                 }
                             `}
-                            title="拍照或选择图片进行AI识别"
+                            title={t('拍照或选择图片进行AI识别')}
                         >
                             {ocrLoading ? (
                                 <Loader2 className="w-6 h-6 animate-spin" />
@@ -452,7 +462,7 @@ export function TransactionForm({
                 <div className="grid grid-cols-2 gap-4">
                     <div className="w-full overflow-hidden">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            发生日期
+                            {t('发生日期')}
                         </label>
                         <input
                             type="date"
@@ -477,7 +487,7 @@ export function TransactionForm({
                     </div>
 
                     <Input
-                        label="金额"
+                        label={t('金额')}
                         type="number"
                         min={0}
                         step={1}
@@ -490,20 +500,20 @@ export function TransactionForm({
                 {/* 4. 支付/收款方式 + 税务类型 */}
                 <div className="grid grid-cols-2 gap-4">
                     <Select
-                        label="支付/收款方式"
+                        label={t('支付/收款方式')}
                         value={formData.fin_type ?? ''}
                         onChange={(e) => updateField('fin_type', e.target.value ? Number(e.target.value) as 1 | 2 | 3 | 4 | 5 : undefined)}
-                        options={FIN_TYPE_OPTIONS}
-                        placeholder="请选择"
+                        options={FIN_TYPE_OPTIONS.map((o) => ({ ...o, label: t(o.label) }))}
+                        placeholder={t('请选择')}
                         error={errors.fin_type}
                     />
 
                     <Select
-                        label="税务类型"
+                        label={t('税务类型')}
                         value={formData.tax_type ?? ''}
                         onChange={(e) => updateField('tax_type', e.target.value ? Number(e.target.value) as 1 | 2 : undefined)}
-                        options={TAX_TYPE_OPTIONS}
-                        placeholder="请选择"
+                        options={TAX_TYPE_OPTIONS.map((o) => ({ ...o, label: t(o.label) }))}
+                        placeholder={t('请选择')}
                         error={errors.tax_type}
                     />
                 </div>
@@ -512,18 +522,18 @@ export function TransactionForm({
                 {formData.tax_type === 2 && (
                     <div className="grid grid-cols-2 gap-4">
                         <Select
-                            label="税率"
+                            label={t('税率')}
                             value={formData.tax_rate || ''}
                             onChange={(e) => updateField('tax_rate', Number(e.target.value) as 1 | 2 | 3)}
-                            options={TAX_RATE_OPTIONS}
-                            placeholder="请选择税率"
+                            options={TAX_RATE_OPTIONS.map((o) => ({ ...o, label: t(o.label) }))}
+                            placeholder={t('请选择税率')}
                             error={errors.tax_rate}
                         />
 
                         {/* 混合税率或其他时显示总课税额输入框 */}
                         {needsManualTaxAmount ? (
                             <Input
-                                label="总课税额"
+                                label={t('总课税额')}
                                 type="number"
                                 min={0}
                                 step={1}
@@ -541,7 +551,7 @@ export function TransactionForm({
                 {formData.tax_type === 2 && formData.tax_rate && formData.tax_rate !== 3 && formData.tax_rate !== 4 && formData.tax_amount !== undefined && (
                     <div className="bg-gray-50 rounded-lg p-4">
                         <p className="text-sm text-gray-600">
-                            预估税额: <span className="font-semibold text-gray-900">¥{formData.tax_amount.toLocaleString()}</span>
+                            {t('预估税额:')} <span className="font-semibold text-gray-900">¥{formData.tax_amount.toLocaleString()}</span>
                         </p>
                     </div>
                 )}
@@ -550,18 +560,18 @@ export function TransactionForm({
                 {mode === 'edit' && (
                     <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
                         <Input
-                            label="借方科目"
+                            label={t('借方科目')}
                             value={formData.debit_item}
                             onChange={(e) => updateField('debit_item', e.target.value)}
-                            placeholder={initialData?.debit_item ? '不可清空' : '可为空'}
+                            placeholder={initialData?.debit_item ? t('不可清空') : t('可为空')}
                             error={errors.debit_item}
                         />
 
                         <Input
-                            label="貸方科目"
+                            label={t('貸方科目')}
                             value={formData.credit_item}
                             onChange={(e) => updateField('credit_item', e.target.value)}
-                            placeholder={initialData?.credit_item ? '不可清空' : '可为空'}
+                            placeholder={initialData?.credit_item ? t('不可清空') : t('可为空')}
                             error={errors.credit_item}
                         />
                     </div>
@@ -575,14 +585,14 @@ export function TransactionForm({
                         onClick={onCancel}
                         disabled={loading}
                     >
-                        取消
+                        {t('取消')}
                     </Button>
                     <Button
                         type="submit"
                         loading={loading}
                         disabled={!isFormValid()}
                     >
-                        {mode === 'create' ? '创建' : '保存'}
+                        {mode === 'create' ? t('创建') : t('保存')}
                     </Button>
                 </div>
             </form>
@@ -606,18 +616,18 @@ export function TransactionForm({
                     <div className="flex min-h-full items-center justify-center p-4">
                         <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-scale-in">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                                识别结果确认
+                                {t('识别结果确认')}
                             </h3>
 
                             <p className="text-sm text-gray-600 mb-4">
-                                以下字段将被更新：
+                                {t('以下字段将被更新：')}
                             </p>
 
                             <div className="space-y-3 mb-6">
                                 {ocrChanges.map((change, index) => (
                                     <div key={index} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
                                         <span className="text-sm font-medium text-gray-700">
-                                            {FIELD_LABELS[change.field] || change.field}
+                                            {t(FIELD_LABELS[change.field] || change.field)}
                                         </span>
                                         <div className="flex items-center gap-2 text-sm">
                                             <span className="text-gray-400 line-through">
@@ -638,13 +648,13 @@ export function TransactionForm({
                                     onClick={handleOcrConfirmCancel}
                                     fullWidth
                                 >
-                                    取消
+                                    {t('取消')}
                                 </Button>
                                 <Button
                                     onClick={handleOcrConfirm}
                                     fullWidth
                                 >
-                                    确认更新
+                                    {t('确认更新')}
                                 </Button>
                             </div>
                         </div>

@@ -2,6 +2,7 @@ import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 import { Download, FileText, Package } from 'lucide-react';
 import { useState } from 'react';
+import { useI18n } from '../../contexts/I18nContext';
 import { useToast } from '../../contexts/ToastContext';
 import type { Ledger, LedgerResponse } from '../../types';
 import { generateLedgerPDF } from '../../utils/pdfGenerator';
@@ -19,6 +20,7 @@ interface LedgerResultProps {
 
 export function LedgerResult({ isOpen, onClose, data, dateFrom, dateTo }: LedgerResultProps) {
     const { showToast } = useToast();
+    const { t } = useI18n();
     const [showPDFModal, setShowPDFModal] = useState(false);
     const [pdfLoading, setPdfLoading] = useState(false);
     const [selectedLedger, setSelectedLedger] = useState<Ledger | null>(null);
@@ -111,10 +113,10 @@ export function LedgerResult({ isOpen, onClose, data, dateFrom, dateTo }: Ledger
             }
 
             setShowPDFModal(false);
-            showToast('success', 'PDF 导出成功');
+            showToast('success', t('PDF 导出成功'));
         } catch (error) {
             console.error('PDF export error:', error);
-            showToast('error', 'PDF 导出失败');
+            showToast('error', t('PDF 导出失败'));
         } finally {
             setPdfLoading(false);
         }
@@ -136,7 +138,7 @@ export function LedgerResult({ isOpen, onClose, data, dateFrom, dateTo }: Ledger
             >
                 <div className="space-y-4">
                     <p className="text-sm text-gray-500">
-                        共 {data.total_accounts} 个科目
+                        {t('共 {count} 个科目', { count: data.total_accounts })}
                     </p>
 
                     {/* 科目列表 */}
@@ -144,10 +146,10 @@ export function LedgerResult({ isOpen, onClose, data, dateFrom, dateTo }: Ledger
                         <table className="w-full text-sm">
                             <thead className="bg-gray-50 sticky top-0">
                                 <tr>
-                                    <th className="px-4 py-3 text-left font-medium text-gray-700">勘定科目</th>
-                                    <th className="px-4 py-3 text-right font-medium text-gray-700">借方合計</th>
-                                    <th className="px-4 py-3 text-right font-medium text-gray-700">貸方合計</th>
-                                    <th className="px-4 py-3 text-center font-medium text-gray-700">导出</th>
+                                    <th className="px-4 py-3 text-left font-medium text-gray-700">{t('勘定科目')}</th>
+                                    <th className="px-4 py-3 text-right font-medium text-gray-700">{t('借方合計')}</th>
+                                    <th className="px-4 py-3 text-right font-medium text-gray-700">{t('貸方合計')}</th>
+                                    <th className="px-4 py-3 text-center font-medium text-gray-700">{t('导出')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -167,7 +169,7 @@ export function LedgerResult({ isOpen, onClose, data, dateFrom, dateTo }: Ledger
                                                 <button
                                                     onClick={() => handleExportSingleCSV(ledger)}
                                                     className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
-                                                    title="导出 CSV"
+                                                    title={t('导出 CSV')}
                                                 >
                                                     <Download className="w-3.5 h-3.5" />
                                                     CSV
@@ -175,7 +177,7 @@ export function LedgerResult({ isOpen, onClose, data, dateFrom, dateTo }: Ledger
                                                 <button
                                                     onClick={() => handleExportSinglePDF(ledger)}
                                                     className="inline-flex items-center gap-1 px-2 py-1 text-xs text-sky-600 hover:text-sky-700 hover:bg-sky-50 rounded transition-colors"
-                                                    title="导出 PDF"
+                                                    title={t('导出 PDF')}
                                                 >
                                                     <FileText className="w-3.5 h-3.5" />
                                                     PDF
@@ -195,16 +197,16 @@ export function LedgerResult({ isOpen, onClose, data, dateFrom, dateTo }: Ledger
                             onClick={handleExportAllCSV}
                             icon={<Package className="w-4 h-4" />}
                         >
-                            全部 CSV (ZIP)
+                            {t('全部 CSV (ZIP)')}
                         </Button>
                         <Button
                             onClick={handleExportAllPDFClick}
                             icon={<Package className="w-4 h-4" />}
                         >
-                            全部 PDF (ZIP)
+                            {t('全部 PDF (ZIP)')}
                         </Button>
                         <Button variant="ghost" onClick={onClose}>
-                            关闭
+                            {t('关闭')}
                         </Button>
                     </div>
                 </div>
@@ -215,8 +217,8 @@ export function LedgerResult({ isOpen, onClose, data, dateFrom, dateTo }: Ledger
                 onClose={() => setShowPDFModal(false)}
                 onExport={handlePDFExport}
                 title={exportAllPDF
-                    ? "导出全部総勘定元帳 PDF"
-                    : `导出総勘定元帳 PDF - ${selectedLedger?.勘定科目}`
+                    ? t('导出全部総勘定元帳 PDF')
+                    : `${t('导出総勘定元帳 PDF')} - ${selectedLedger?.勘定科目}`
                 }
                 loading={pdfLoading}
             />

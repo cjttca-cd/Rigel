@@ -1,6 +1,7 @@
 import { saveAs } from 'file-saver';
 import { BookOpen, Download, FileText } from 'lucide-react';
 import { useState } from 'react';
+import { useI18n } from '../../contexts/I18nContext';
 import { useToast } from '../../contexts/ToastContext';
 import type { JournalResponse } from '../../types';
 import { generateJournalRecordsPDF } from '../../utils/pdfGenerator';
@@ -18,6 +19,7 @@ interface JournalResultProps {
 
 export function JournalResult({ isOpen, onClose, data, dateFrom, dateTo }: JournalResultProps) {
     const { showToast } = useToast();
+    const { t } = useI18n();
     const [showPDFModal, setShowPDFModal] = useState(false);
     const [pdfLoading, setPdfLoading] = useState(false);
 
@@ -50,7 +52,7 @@ export function JournalResult({ isOpen, onClose, data, dateFrom, dateTo }: Journ
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
         saveAs(blob, `仕訳帳_${dateFrom}_${dateTo}.csv`);
-        showToast('success', 'CSV 导出成功');
+        showToast('success', t('CSV 导出成功'));
     };
 
     // 导出 PDF
@@ -60,10 +62,10 @@ export function JournalResult({ isOpen, onClose, data, dateFrom, dateTo }: Journ
             const blob = await generateJournalRecordsPDF(data.records, companyName, dateFrom, dateTo);
             saveAs(blob, `仕訳帳_${dateFrom}_${dateTo}.pdf`);
             setShowPDFModal(false);
-            showToast('success', 'PDF 导出成功');
+            showToast('success', t('PDF 导出成功'));
         } catch (error) {
             console.error('PDF export error:', error);
-            showToast('error', 'PDF 导出失败');
+            showToast('error', t('PDF 导出失败'));
         } finally {
             setPdfLoading(false);
         }
@@ -84,14 +86,14 @@ export function JournalResult({ isOpen, onClose, data, dateFrom, dateTo }: Journ
                             <BookOpen className="w-7 h-7 text-amber-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-amber-700 font-medium">账目总数</p>
-                            <p className="text-3xl font-bold text-gray-900">{data.total_count} <span className="text-base font-normal text-gray-500">条</span></p>
+                            <p className="text-sm text-amber-700 font-medium">{t('账目总数')}</p>
+                            <p className="text-3xl font-bold text-gray-900">{data.total_count} <span className="text-base font-normal text-gray-500">{t('条')}</span></p>
                         </div>
                     </div>
 
                     {/* 说明文字 */}
                     <p className="text-sm text-gray-500 text-center">
-                        请选择导出格式下载仕訳帳文件
+                        {t('请选择导出格式下载仕訳帳文件')}
                     </p>
 
                     {/* 按钮区域 */}
@@ -102,21 +104,21 @@ export function JournalResult({ isOpen, onClose, data, dateFrom, dateTo }: Journ
                             onClick={handleExportCSV}
                             icon={<Download className="w-5 h-5" />}
                         >
-                            导出 CSV
+                            {t('导出 CSV')}
                         </Button>
                         <Button
                             size="lg"
                             onClick={() => setShowPDFModal(true)}
                             icon={<FileText className="w-5 h-5" />}
                         >
-                            导出 PDF
+                            {t('导出 PDF')}
                         </Button>
                     </div>
 
                     {/* 关闭按钮 */}
                     <div className="flex justify-center pt-2 border-t border-gray-100">
                         <Button variant="ghost" onClick={onClose}>
-                            关闭
+                            {t('关闭')}
                         </Button>
                     </div>
                 </div>
@@ -126,7 +128,7 @@ export function JournalResult({ isOpen, onClose, data, dateFrom, dateTo }: Journ
                 isOpen={showPDFModal}
                 onClose={() => setShowPDFModal(false)}
                 onExport={handleExportPDF}
-                title="导出仕訳帳 PDF"
+                title={t('导出仕訳帳 PDF')}
                 loading={pdfLoading}
             />
         </>

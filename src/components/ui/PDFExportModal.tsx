@@ -1,5 +1,6 @@
 import { FileText } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useI18n } from '../../contexts/I18nContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
@@ -21,6 +22,7 @@ export function PDFExportModal({
     title,
     loading = false
 }: PDFExportModalProps) {
+    const { t } = useI18n();
     const [companyName, setCompanyName] = useState('');
 
     // 从 localStorage 恢复上次输入的公司名
@@ -50,25 +52,25 @@ export function PDFExportModal({
         >
             <div className="space-y-4">
                 <Input
-                    label="公司名称"
+                    label={t('公司名称')}
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
-                    placeholder="例：株式会社 ○○○"
+                    placeholder={t('例：株式会社 ○○○')}
                 />
                 <p className="text-xs text-gray-500">
-                    公司名称将显示在 PDF 的页眉和页脚中。留空也可以导出。
+                    {t('公司名称将显示在 PDF 的页眉和页脚中。留空也可以导出。')}
                 </p>
 
                 <div className="flex justify-end gap-3 pt-2">
                     <Button variant="ghost" onClick={onClose} disabled={loading}>
-                        取消
+                        {t('取消')}
                     </Button>
                     <Button
                         onClick={handleExport}
                         loading={loading}
                         icon={<FileText className="w-4 h-4" />}
-                    >
-                        导出 PDF
+>
+                        {t('导出 PDF')}
                     </Button>
                 </div>
             </div>

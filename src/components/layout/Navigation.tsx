@@ -2,8 +2,9 @@ import { BarChart3, BookOpen, FileText, Home, LogOut, Menu, User, X } from 'luci
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { supportedLangs, useI18n } from '../../contexts/I18nContext';
+import { useI18n } from '../../contexts/I18nContext';
 import { signOut } from '../../services/firebase';
+import { LanguageSwitcherInline } from '../ui/LanguageSwitcherInline';
 
 interface NavItem {
     path: string;
@@ -20,7 +21,7 @@ const navItems: NavItem[] = [
 export function Navigation() {
     const { user } = useAuth();
     const location = useLocation();
-    const { lang, t, withLang } = useI18n();
+    const { t, withLang } = useI18n();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -41,11 +42,7 @@ export function Navigation() {
         return stripLangPath.startsWith(path);
     };
 
-    const basePath = stripLangPath === '/' ? '' : stripLangPath;
-    const languageLinks = supportedLangs.map((targetLang) => ({
-        lang: targetLang,
-        to: `/${targetLang}${basePath}${location.search}`
-    }));
+    // Language links are now handled by <LanguageSwitcherInline />
 
     return (
         <>
@@ -85,22 +82,8 @@ export function Navigation() {
 
                         {/* 用户菜单 */}
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                                <span className="text-xs uppercase tracking-wide text-gray-400">{t('语言')}</span>
-                                <div className="flex items-center gap-2">
-                                    {languageLinks.map((item) => (
-                                        <Link
-                                            key={item.lang}
-                                            to={item.to}
-                                            className={`text-xs font-medium transition-colors ${item.lang === lang
-                                                ? 'text-sky-600'
-                                                : 'text-gray-500 hover:text-gray-700'
-                                                }`}
-                                        >
-                                            {item.lang === 'zh' ? t('中文') : item.lang === 'en' ? t('English') : t('日本語')}
-                                        </Link>
-                                    ))}
-                                </div>
+                            <div className="flex items-center gap-2">
+                                <LanguageSwitcherInline size="sm" showCurrent={false} />
                             </div>
 
                             <div className="relative">
@@ -186,39 +169,36 @@ export function Navigation() {
                 {mobileMenuOpen && (
                     <div className="border-t border-gray-100 bg-white animate-fade-in">
                         <div className="px-4 py-4 space-y-2">
-                            <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-lg">
-                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                                    {user?.photoURL ? (
-                                        <img
-                                            src={user.photoURL}
-                                            alt=""
-                                            className="w-10 h-10 rounded-full object-cover"
-                                        />
-                                    ) : (
-                                        <User className="w-5 h-5 text-gray-500" />
-                                    )}
+                            <div className="flex items-center justify-between gap-3 px-3 py-2 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center shrink-0">
+                                        {user?.photoURL ? (
+                                            <img
+                                                src={user.photoURL}
+                                                alt=""
+                                                className="w-10 h-10 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <User className="w-5 h-5 text-gray-500" />
+                                        )}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-medium text-gray-900 truncate">
+                                            {user?.displayName || t('用户')}
+                                        </p>
+                                        <p className="text-xs text-gray-500 truncate">
+                                            {user?.email}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">
-                                        {user?.displayName || t('用户')}
-                                    </p>
-                                    <p className="text-xs text-gray-500 truncate">
-                                        {user?.email}
-                                    </p>
-                                </div>
-                            </div>
 
-                            <div className="flex items-center gap-2 px-3 text-xs uppercase tracking-wide text-gray-400">
-                                {t('语言')}
-                                {languageLinks.map((item) => (
-                                    <Link
-                                        key={item.lang}
-                                        to={item.to}
-                                        className={`text-xs font-medium ${item.lang === lang ? 'text-sky-600' : 'text-gray-500'}`}
-                                    >
-                                        {item.lang === 'zh' ? t('中文') : item.lang === 'en' ? t('English') : t('日本語')}
-                                    </Link>
-                                ))}
+                                <div className="shrink-0">
+                                    <LanguageSwitcherInline
+                                        size="md"
+                                        showCurrent={false}
+                                        onNavigate={() => setMobileMenuOpen(false)}
+                                    />
+                                </div>
                             </div>
 
                             <button
